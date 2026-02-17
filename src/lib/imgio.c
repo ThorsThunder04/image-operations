@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "imgio.h"
-
+#include "imgops.h"
 
 /**
  * @brief reads PNM image from a given filename.
@@ -31,6 +31,8 @@ void get_image(char* filename, IMAGE* img) {
     // allocate and read pixel rows of image
     for (int r = 0; r < img->height; r++) {
         imgmat[r] = (PIXEL*)malloc(img->width*sizeof(PIXEL));
+
+        // on malloc error
         if (imgmat[r] == NULL) {
             printf("Error allocating image row columns !\n");
 
@@ -58,7 +60,33 @@ void get_image(char* filename, IMAGE* img) {
  * @param destname: pathname of the image file to write
  * @param img: IMAGE data to write to file
  */
-void write_to_pgm(char* destname, IMAGE* img);
+void write_to_pgm(char* destname, IMAGE* img) {
+
+    FILE* imgfd = fopen(destname, "w");
+
+    // write the image file headers
+    fprintf(imgfd, "P5\n");
+    fprintf(imgfd, "%u %u 255\n", img->width, img->height);
+
+    for (int r = 0; r < img->height; r++) {
+        for (int c = 0; c < img->width; c++) {
+
+
+            PIXEL* px = img->imgmat[r][c]
+
+            // if the IMAGE object being written is in RGB
+            if (img->is_rgb) *px = (PIXEL)rgb2g(px);
+
+            fwrite(
+                (void*)px,
+                sizeof(GPIXEL),
+                1,
+                imgfd
+            );
+        }
+    }
+    fclose(imgfd);
+}
 
 /**
  * @brief writes a given image to a PPM file. If the image data is grayscale, the grayscale pixel value will be trippled and writting to the 3 rgb values of a pixel.
@@ -66,8 +94,46 @@ void write_to_pgm(char* destname, IMAGE* img);
  * @param destname: pathname of the image file to write
  * @param img: IMAGE data to write to file
  */
-void write_to_ppm(char* destname, IMAGE* img);
+void write_to_ppm(char* destname, IMAGE* img) {
 
+    FILE* imgfd = fopen(destname, "w");
+    if (imgfd == NULL) {
+        printf("Error opening PPM image for writing\n");
+        exit(EXIT_FAILURE);
+    }
+
+    fprintf(imgfd, "P6\n");
+    fprintf(imgfd, "%u %u 255\n", img->width, img->height);
+
+    int objSize = sizeof(RGBPIXEL);
+    int writeSize = 1;
+
+    if (!img->is_rgb) {
+        objSize = sizeof(GPIXEL);
+        writeSize = 3;
+    }
+
+    for (int r = 0; r < img->height; r++) {
+        for int c = 0; c < img->height; r++) {
+
+            /*
+             * Since the size of a PIXEL union is 3 BYTEs,
+             * Here we iterate over each pixel object, and then only write
+             * whichever section of it that we need
+             *
+             * If it's grayscale, we only need the first byte of the union structure (read the GPIXEL size) to get the color
+             * Otherwise we need the entire union structure
+             */
+            fwrite(
+                (void*)&(img->mat[r][c]),
+                objSize,
+                writeSize,
+                imgfd
+            );
+        }
+    }
+    fclose(imgfd);
+}
 
 /**
  * @brief De-allocates the dynamically allocated parts of an IMAGE structure
@@ -75,7 +141,18 @@ void write_to_ppm(char* destname, IMAGE* img);
  *
  * @param img: pointer towards previously created image structure
  */
-void free_image(IMAGE* img);
+void free_image(IMAGE* img) {
+
+    // free each row
+    for (int r = 0; r < img->height; r++) {
+        free(img->mat[r]);
+    }
+
+    // free main image pointer
+    free(img->mat);
+    // set pointer to NULL to avoid seg. fault
+    img->mat = NULL;
+}
 
 
 /**
@@ -127,7 +204,7 @@ void _skip_comments(FILE* fd) {
     if (feof(fd)) {
         printf("End of file reached while skipping comments!\n");
         fclose(fd);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     while ((c = fgetc(fd)) == '#') {
         while ((c = fgetc(fd)) != '\n');
