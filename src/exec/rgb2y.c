@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "imgio.h"
-#include "imgops.h"
+#include <imgio.h>
+#include <imgops.h>
 
 
 int main(int argc, char* argv[]) {
