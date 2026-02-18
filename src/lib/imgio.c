@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "imgio.h"
-#include "imgops.h"
+#include <string.h>
+#include <imgio.h>
+#include <imgops.h>
 
 /**
  * @brief dynamic allocation of memory for pixel matrix
@@ -10,14 +11,14 @@
  * @param width: width of the pixel matrix
  * @param height: height of the pixel matrix
  *
- * @returns the PIXEL** type of the allocated memory
+ * @returns PIXEL** type (beginning of matrix) | NULL if dynamic allocation failed (refer to malloc of stdlib.h)
  */
-PIXEL** pixalloc(int width, int height) {
+PIXEL** pxalloc(int width, int height) {
     // allocate all row pointers
     PIXEL** mat = (PIXEL**)malloc(sizeof(PIXEL*)*height);
     if (mat == NULL) {
-        printf("Error allocating memory for pixel matrix rows !\n");
-        exit(EXIT_FAILURE);
+        // propagate the MALLOC error, as it's essencially just that
+        return NULL;
     }
 
     for (int r = 0; r < height; r++) {
@@ -30,7 +31,9 @@ PIXEL** pixalloc(int width, int height) {
             // de-allocate all memory of the matrix allocated up until this point
             for (int rr = 0; rr < r; rr++) free(mat[rr]);
             free(mat);
-            exit(EXIT_FAILURE);
+
+            // propagate the MALLOC error
+            return NULL;
         }
     }
 
@@ -66,7 +69,7 @@ void read_pnm_image(char* filename, IMAGE* img) {
 
 
     // allocate memory for image pixel matrice
-    img->mat = pixalloc(img->width, img->height);
+    img->mat = pxalloc(img->width, img->height);
 
     for (int r = 0; r < img->height; r++) {
         for (int c = 0; c < img->width; c++) {
@@ -109,10 +112,15 @@ void read_ppm_image(char* filename, IMAGE* img) {
     unsigned int width, height;
     _read_image_dimensions(imgfd, &width, &height);
 
-    img->mat = pixalloc(width, height);
+    img->mat = pxalloc(width, height);
+    if (img->mat == NULL) {
+        printf("Error allocating pixel matrix memory for read PPM file %s\n", filename);
+        fclose(imgfd);
+    }
 
     for (int r = 0; r < height; r++) {
         for (int c = 0; c < width; c++) {
+
             int res = fread(
                 (void*)&img->mat[r][c],
                 sizeof(BYTE)*3, // RGBPIXEL works too, but I think 3*BYTE is safer
@@ -168,7 +176,11 @@ void read_pgm_image(char* filename, IMAGE* img) {
     unsigned int width, height;
     _read_image_dimensions(imgfd, &width, &height);
 
-    img->mat = pixalloc(width, height);
+    img->mat = pxalloc(width, height);
+    if (img->mat == NULL) {
+        printf("Error allocating pixel matrix memory for read PGM file %s\n", filename);
+        fclose(imgfd);
+    }
 
     for (int r = 0; r < height; r++) {
         for (int c = 0; c < width; c++) {
@@ -310,7 +322,135 @@ void get_image_dimensions(char* filename, IMAGE* img) {
     fclose(imgfd);
 }
 
+/**
+ * @brief copies an image into another pointer (including allocation of the pixel matrix)
+ * 
+ * @param dest where to copy the image to
+ * @param src the image to copy
+ */
+void img_copy(IMAGE* dest, IMAGE* src) {
 
+    // copies the initial structure
+    memcpy(dest, src, sizeof(IMAGE));
+
+    dest->mat = pxalloc(dest->width, dest->height);
+
+    pxmat_copy(dest->mat, src->mat, dest->width, dest->height);
+
+}
+
+/**
+ * @brief copies a 2D pixel matrix
+ * 
+ * @param dest where to copy the matrix to (must already have the necessary allocated space, otherwise seg fault)
+ * @param src  the matrix to copy
+ * @param width width of the matrix
+ * @param height height of the matrix
+ */
+void pxmat_copy(PIXEL** dest, PIXEL** src, int width, int height) {
+
+    // copy each row of pixels from src to dest
+    for (int r = 0; r < height; r++) {
+        memcpy(dest[r], src[r], sizeof(PIXEL)*width);
+    }
+}
+
+
+/**
+ * @brief Extracts the red channel from an RGBPIXEL image and places it in a GPIXEL image
+ * 
+ * @param dest destination image
+ * @param src  source image
+ */
+void extr_rchan2img(IMAGE* dest, IMAGE* src) {
+    // yeah yeah it's just a wrapper, idc
+
+    extr_rchan2pxmat(dest->mat, src->mat, src->width, src->height);
+
+}
+
+/**
+ * @brief Extracts the red channel from an 2D (RGB)PIXEL matrix and places it in a (G)PIXEL matrix
+ * 
+ * @param dest destination matrix
+ * @param src source matrix
+ * @param width width of the matrix
+ * @param height height of the matrix
+ */
+void extr_rchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
+    /*
+    This operation is sort of redundant in a sense, as since PIXEL is a union, the location of R
+    from an RGBPIXEL is in the same position as a V from a GPIXEL. So the operation is kind of just like
+    we are copying a single channel over to a different matrix.
+    */
+
+    // for each pixel, extract the red channel from src, and place it in the grey channel of dest
+    for (int r = 0; r < height; r++) {
+        for (int c = 0; c < width; c++) {
+            dest[r][c].gpx.v = src[r][c].cpx.r;
+        }
+    }
+}
+
+/**
+ * @brief Extracts the green channel from an RGBPIXEL image and places it in a GPIXEL image
+ * 
+ * @param dest destination image
+ * @param src  source image
+ */
+void extr_gchan2img(IMAGE* dest, IMAGE* src) {
+
+    extr_gchan2pxmat(dest->mat, src->mat, src->width, src->height);
+
+}
+
+/**
+ * @brief Extracts the green channel from an 2D (RGB)PIXEL matrix and places it in a (G)PIXEL matrix
+ * 
+ * @param dest destination matrix
+ * @param src source matrix
+ * @param width width of the matrix
+ * @param height height of the matrix
+ */
+void extr_gchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
+
+    // for each pixel, extract the green channel from src, and place it in the grey channel of dest
+    for (int r = 0; r < height; r++) {
+        for (int c = 0; c < width; c++) {
+            dest[r][c].gpx.v = src[r][c].cpx.g;
+        }
+    }
+}
+
+/**
+ * @brief Extracts the blue channel from an RGBPIXEL image and places it in a GPIXEL image
+ * 
+ * @param dest destination image
+ * @param src  source image
+ */
+void extr_bchan2img(IMAGE* dest, IMAGE* src) {
+
+    extr_bchan2pxmat(dest->mat, src->mat, src->width, src->height);
+
+}
+
+/**
+ * @brief Extracts the blue channel from an 2D (RGB)PIXEL matrix and places it in a (G)PIXEL matrix
+ * 
+ * @param dest destination matrix
+ * @param src source matrix
+ * @param width width of the matrix
+ * @param height height of the matrix
+ */
+void extr_bchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
+
+    // for each pixel, extract the blue channel from src, and place it in the grey channel of dest
+    for (int r = 0; r < height; r++) {
+        for (int c = 0; c < width; c++) {
+            dest[r][c].gpx.v = src[r][c].cpx.b;
+        }
+    }
+}
 
 ///////////////////////////////////////
 // PRIVATE FUNCTIONS

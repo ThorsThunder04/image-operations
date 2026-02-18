@@ -54,9 +54,9 @@ typedef struct {
  * @param width: width of the pixel matrix
  * @param height: height of the pixel matrix
  *
- * @returns PIXEL** type (beginning of matrix)
+ * @returns PIXEL** type (beginning of matrix) | NULL if dynamic allocation failed (refer to malloc of stdlib.h)
  */
-PIXEL** pixalloc(int width, int height);
+PIXEL** pxalloc(int width, int height);
 
 
 /**

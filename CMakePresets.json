@@ -1,0 +1,12 @@
+
+{
+    "version": 4,
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "Default Geneartor",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build"
+        }
+    ]
+}
