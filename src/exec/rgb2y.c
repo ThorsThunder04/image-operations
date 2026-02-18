@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
     write_pgm2pgm(argv[2], &img);
 
 
-    free_imgmat(img.mat, img.height);
+    free_pxmat(img.mat, img.height);
 
     return 0;
 

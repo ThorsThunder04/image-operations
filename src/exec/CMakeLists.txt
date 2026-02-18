@@ -12,3 +12,8 @@ target_link_libraries(rgb2y
         imgops
         imgio
 )
+
+add_executable(sepYCrCb)
+
+target_sources(sepYCrCb PRIVATE sepYCrCb.c)
+target_link_libraries(sepYCrCb PRIVATE imgops imgio)
