@@ -9,6 +9,8 @@
  *
  * @param width: width of the pixel matrix
  * @param height: height of the pixel matrix
+ *
+ * @returns the PIXEL** type of the allocated memory
  */
 PIXEL** pixalloc(int width, int height) {
     // allocate all row pointers
@@ -39,25 +41,29 @@ PIXEL** pixalloc(int width, int height) {
 /**
  * @brief reads PNM image from a given filename (detects wether it's PGM or PPM)
  * @brief Only supports PGM and PPM images of max pixel val 255.
+ * 
+ * ! this function should really get deprecated soon
  *
  * @param filename: string representing path to PNM file to open
  * @param img: destination pointer to write the IMAGE data to
  */
 void read_pnm_image(char* filename, IMAGE* img) {
 
-    FILE* imgfd = fopen(filename, "r");
+    FILE* imgfd = fopen(filename, "rb");
 
+    // check that file exists
     if (imgfd == NULL) {
         printf("Error opening PNM file!\n");
         exit(EXIT_FAILURE);
     }
 
 
-    img->is_rgb = _read_pnm_type(imgfd) == 6; // PPM (rgb) type is "P6"
-    unsigned int pixel_size = (img->is_rgb) ? sizeof(BYTE)*3 : sizeof(BYTE); // not using size of the pixel structures due to alignment
+    img->img_type = _read_pnm_type(imgfd); // PPM (rgb) type is "P6"
+    unsigned int pixel_size = (img->img_type == PPM) ? sizeof(BYTE)*3 : sizeof(BYTE); // not using size of the pixel structures due to alignment
 
     _skip_comments(imgfd);
     _read_image_dimensions(imgfd, &(img->width), &(img->height));
+
 
     // allocate memory for image pixel matrice
     img->mat = pixalloc(img->width, img->height);
@@ -78,95 +84,185 @@ void read_pnm_image(char* filename, IMAGE* img) {
  * @param filename: string representing path to PPM file to open
  * @param img: destination pointer to write the IMAGE data to
  */
-void read_ppm_image(char* filename, IMAGE* img); // TODO Implement
+void read_ppm_image(char* filename, IMAGE* img) {
+
+    FILE* imgfd = fopen(filename, "rb");
+
+    // check that file exists
+    if (imgfd == NULL) {
+        printf("Error opening PPM file %s\n", filename);
+        exit(EXIT_FAILURE);
+    }
+
+    IMGTYPE it = _read_pnm_type(imgfd);
+
+    if (it != PPM) {
+        printf("Incorrect file type! Tried opening PPM, P%d type recieved!\n", it);
+        fclose(imgfd);
+        exit(EXIT_FAILURE);
+    }
+
+    img->img_type = PPM;
+
+    _skip_comments(imgfd);
+
+    unsigned int width, height;
+    _read_image_dimensions(imgfd, &width, &height);
+
+    img->mat = pixalloc(width, height);
+
+    for (int r = 0; r < height; r++) {
+        for (int c = 0; c < width; c++) {
+            int res = fread(
+                (void*)&img->mat[r][c],
+                sizeof(BYTE)*3, // RGBPIXEL works too, but I think 3*BYTE is safer
+                1,
+                imgfd
+            );
+            if (res < 1) {
+                if (feof(imgfd)) {
+                    printf("Error: unexpectedly reached end of file in %s !\n", filename);
+                } else {
+                    printf("Error: something went wrong while reading from %s !\n", filename);
+                }
+            }
+
+        }
+    }
+    fclose(imgfd);
+
+    img->width = width;
+    img->height = height;
+
+}
 
 /**
- * @brief Reads PPM image from a given filename.
+ * @brief Reads PGM image from a given filename.
  * @brief Only supports max pixel value of 255
  *
- * @param filename: string representing path to PPM file to open
+ * @param filename: string representing path to PGM file to open
  * @param img: destination pointer to write the IMAGE data to
  */
-void read_pgm_image(char* filename, IMAGE* img); // TODO Implement
+void read_pgm_image(char* filename, IMAGE* img) {
+
+    FILE* imgfd = fopen(filename, "rb");
+
+    // check that file exists
+    if (imgfd == NULL) {
+        printf("Error opening PGM file %s\n", filename);
+        exit(EXIT_FAILURE);
+    }
+
+    IMGTYPE it = _read_pnm_type(imgfd);
+
+    if (it != PGM) {
+        printf("Incorrect file type! Tried opening PGM, P%d type recieved!\n", it);
+        fclose(imgfd);
+        exit(EXIT_FAILURE);
+    }
+
+    img->img_type = PGM;
+
+    _skip_comments(imgfd);
+
+    unsigned int width, height;
+    _read_image_dimensions(imgfd, &width, &height);
+
+    img->mat = pixalloc(width, height);
+
+    for (int r = 0; r < height; r++) {
+        for (int c = 0; c < width; c++) {
+            int res = fread(
+                (void*)&img->mat[r][c],
+                sizeof(GPIXEL),
+                1,
+                imgfd
+            );
+
+            if (res < 1) {
+                if (feof(imgfd)) {
+                    printf("Error: unexpectedly reached end of file in %s !\n", filename);
+                } else {
+                    printf("Error: something went wrong while reading from %s !\n", filename);
+                }
+            }
+
+        }
+    }
+    fclose(imgfd);
+
+    img->width = width;
+    img->height = height;
+}
 
 /**
- * @brief writes a given IMAGE to a PGM file. If the image data is rgb, the grayscale pixel values will be the average of red green and blue
+ * @brief writes a given IMAGE to a PGM file.
  *
  * @param destname: pathname of the image file to write
  * @param img: IMAGE data to write to file
  */
-void write_to_pgm(char* destname, IMAGE* img) {
+void write_pgm2pgm(char* destname, IMAGE* img) {
 
-    FILE* imgfd = fopen(destname, "w");
+    FILE* imgfd = fopen(destname, "wb");
 
     // write the image file headers
-    fprintf(imgfd, "P5\n");
-    fprintf(imgfd, "%u %u 255\n", img->width, img->height);
+    fprintf(imgfd, "P5\r");
+    fprintf(imgfd, "%u %u\r255\r", img->width, img->height);
 
     for (int r = 0; r < img->height; r++) {
         for (int c = 0; c < img->width; c++) {
 
-
-            PIXEL* px = &img->mat[r][c];
-
-            // if the IMAGE object being written is in RGB
-            if (img->is_rgb) *px = (PIXEL)rgb2g(&px->cpx);
-
-            fwrite(
-                (void*)px,
+            int res = fwrite(
+                (void*)&img->mat[r][c].gpx,
                 sizeof(BYTE),
                 1,
                 imgfd
             );
+            if (res < 1) {
+                printf("Error writing pgm2pgm to %s\n", destname);
+                exit(EXIT_FAILURE);
+            }
         }
     }
     fclose(imgfd);
 }
 
 /**
- * @brief writes a given image to a PPM file. If the image data is grayscale, the grayscale pixel value will be trippled and writting to the 3 rgb values of a pixel.
+ * @brief writes a given image to a PPM file.
  *
  * @param destname: pathname of the image file to write
  * @param img: IMAGE data to write to file
  */
-void write_to_ppm(char* destname, IMAGE* img) {
+void write_ppm2ppm(char* destname, IMAGE* img) {
 
-    FILE* imgfd = fopen(destname, "w");
+    FILE* imgfd = fopen(destname, "wb");
     if (imgfd == NULL) {
         printf("Error opening PPM image for writing\n");
         exit(EXIT_FAILURE);
     }
 
-    fprintf(imgfd, "P6\n");
-    fprintf(imgfd, "%u %u 255\n", img->width, img->height);
+    fprintf(imgfd, "P6\r");
+    fprintf(imgfd, "%u %u\r255\r", img->width, img->height);
 
-    int objSize = sizeof(BYTE)*3; // size of rgb pixels
-    int writeSize = 1;
-
-    if (!img->is_rgb) {
-        objSize = sizeof(BYTE); // size of grayscale pixel
-        writeSize = 3;
-    }
 
     for (int r = 0; r < img->height; r++) {
-        for (int c = 0; c < img->height; r++) {
+        for (int c = 0; c < img->width; c++) {
 
-            /*
-             * Since the size of a PIXEL union is 3 BYTEs,
-             * Here we iterate over each pixel object, and then only write
-             * whichever section of it that we need
-             *
-             * If it's grayscale, we only need the first byte of the union structure (read the GPIXEL size) to get the color
-             * Otherwise we need the entire union structure
-             */
-            fwrite(
-                (void*)&(img->mat[r][c]),
-                objSize,
-                writeSize,
+            int res = fwrite(
+                (void*)&img->mat[r][c],
+                sizeof(BYTE)*3,
+                1,
                 imgfd
             );
+
+            if (res < 1) {
+                printf("Error writing ppm2ppm to %s\n", destname);
+                exit(EXIT_FAILURE);
+            }
+
         }
     }
+
     fclose(imgfd);
 }
 
@@ -174,21 +270,29 @@ void write_to_ppm(char* destname, IMAGE* img) {
  * @brief De-allocates the dynamically allocated parts of an IMAGE structure
  * @brief NOTE: this only de-alloactes the pixel matrix part of an image. If the rest of the structure was dynamically allocated, it must be freed separately.
  *
- * @param img: pointer towards previously created image structure
+ * @param img: pointer towards previously allocated image structure
  */
-void free_image(IMAGE* img) {
+void free_img(IMAGE* img) {
 
-    // free each row
-    for (int r = 0; r < img->height; r++) {
-        free(img->mat[r]);
-    }
-
-    // free main image pointer
-    free(img->mat);
-    // set pointer to NULL to avoid seg. fault
-    img->mat = NULL;
+    free_imgmat(img->mat, img->height);
+    free(img);
 }
 
+/**
+ * @brief De-allocates a 2D pixel array of a given size
+ *
+ * @param mat: pointer towards the 2D array
+ * @param height: height of the image
+ */
+void free_imgmat(PIXEL** mat, int height) {
+
+    for (int r = 0; r < height; r++) {
+        free(mat[r]);
+    }
+
+    free(mat);
+    *mat = NULL;
+}
 
 /**
  * @brief reads the dimensions from a PNM file and stores them in a provided IMAGE pointer
@@ -198,7 +302,7 @@ void free_image(IMAGE* img) {
  */
 void get_image_dimensions(char* filename, IMAGE* img) {
 
-    FILE* imgfd = fopen(filename, "r");
+    FILE* imgfd = fopen(filename, "rb");
     _read_pnm_type(imgfd);
     _skip_comments(imgfd);
     _read_image_dimensions(imgfd, &(img->width), &(img->height));
@@ -255,7 +359,8 @@ void _read_image_dimensions(FILE* fd, unsigned int* width, unsigned int* height)
 
     int maxval;
 
-    fscanf(fd, "%u %u %u", width, height, &maxval);
+    _skip_whitespace(fd);
+    fscanf(fd, "%u %u %u%*c", width, height, &maxval);
 }
 
 /**
@@ -264,8 +369,8 @@ void _read_image_dimensions(FILE* fd, unsigned int* width, unsigned int* height)
  *
  * @param fd: pointer towards the open file descriptor
  */
-unsigned int _read_pnm_type(FILE* fd) {
-    unsigned int t;
+IMGTYPE _read_pnm_type(FILE* fd) {
+    IMGTYPE t;
 
     fscanf(fd, "P%u", &t);
 

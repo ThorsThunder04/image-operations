@@ -25,6 +25,14 @@ typedef union {
     RGBPIXEL cpx;
 } PIXEL;
 
+typedef enum {
+    PBM = 4,
+    PGM,
+    PPM,
+    PAM
+
+} IMGTYPE;
+
 /**
  * @brief structual definition of a multi channel pixel
  *
@@ -37,7 +45,7 @@ typedef struct {
     unsigned int width;
     unsigned int height;
     PIXEL** mat;
-    BYTE is_rgb;
+    IMGTYPE img_type;
 } IMAGE;
 
 /**
@@ -80,20 +88,20 @@ void read_pgm_image(char* filename, IMAGE* img);
 
 
 /**
- * @brief writes a given IMAGE to a PGM file. If the image data is rgb, the grayscale pixel values will be the average of red green and blue
+ * @brief writes a given IMAGE to a PGM file.
  *
  * @param destname: pathname of the image file to write
  * @param img: IMAGE data to write to file
  */
-void write_to_pgm(char* destname, IMAGE* img);
+void write_pgm2pgm(char* destname, IMAGE* img);
 
 /**
- * @brief writes a given image to a PPM file. If the image data is grayscale, the grayscale pixel value will be trippled and writting to the 3 rgb values of a pixel.
+ * @brief writes a given image to a PPM file.
  *
  * @param destname: pathname of the image file to write
  * @param img: IMAGE data to write to file
  */
-void write_to_ppm(char* destname, IMAGE* img);
+void write_ppm2ppm(char* destname, IMAGE* img);
 
 
 /**
@@ -102,8 +110,15 @@ void write_to_ppm(char* destname, IMAGE* img);
  *
  * @param img: pointer towards previously created image structure
  */
-void free_image(IMAGE* img);
+void free_img(IMAGE* img);
 
+/**
+ * @brief De-allocates a 2D pixel array of a given size
+ *
+ * @param mat: pointer towards the 2D array
+ * @param height: height of the image
+ */
+void free_imgmat(PIXEL** mat, int height);
 
 /**
  * @brief reads the dimensions from a PNM file and stores them in a provided IMAGE pointer

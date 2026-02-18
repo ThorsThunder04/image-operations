@@ -23,3 +23,6 @@ target_sources(imgops
         FILES
             imgops.h
 )
+
+target_link_libraries(imgops PRIVATE imgio)
+target_link_libraries(imgio PRIVATE imgops)

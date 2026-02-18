@@ -2,14 +2,17 @@
 #define IMAGE_OPS_H
 #include "imgio.h"
 
+
 /**
- * @brief creates greyscale RGB pixel
- *
- * @param v: value between 0 and 255 that will be written to the 3 color channels
- *
- * @returns an RGBPIXEL type
+ * @brief returns wether (r,c) is within the bounds of img
+ * 
+ * @param r row in image
+ * @param c column in image
+ * @param img image we're verifying the bounds of
+ * @return int 1 if (r,c) is within bounds, else 0
  */
-RGBPIXEL rgb_from_one(BYTE v);
+int is_ib(int r, int c, IMAGE* img);
+
 
 /**
  * @brief converts grayscale pixel to rgb pixel by copying the grayscale value to R, G, and B channels
@@ -32,16 +35,40 @@ GPIXEL rgb2g(RGBPIXEL* px);
 // PIXEL togray(PIXEL* px);
 
 /**
- * @brief gets a PIXEL type at position (r,c) in the image
+ * @brief gets a PIXEL* type at position (r,c) in an IMAGE
  * @brief NOTE: position (0,0) represent the top left corner of the image
  *
- * @param r: row in the image
- * @param c: column in the image
- * @param img: pointer towards image matrix
+ * @param r row in the image
+ * @param c column in the image
+ * @param img pointer towards image matrix
  *
- * @returns PIXEL* type pointer | NULL if (r,c) is out of bounds
+ * @returns PIXEL* type | NULL if (r,c) is out of bounds
  */
 PIXEL* get_pixel(int r, int c, IMAGE* img);
+
+
+/**
+ * @brief gits the RGBPIXEL* type at position (r,c) from a given PIXEL in an IMAGE
+ * @brief NOTE: position (0,0) represent the top left corner of the image
+ * 
+ * @param r row in image
+ * @param c column in image
+ * @param img pointer to an IMAGE type
+ * @return RGBPIXEL* type | NULL if (r,c) is out of bounds
+ */
+RGBPIXEL* get_rgbpixel(int r, int c, IMAGE* img);
+
+/**
+ * @brief gits the GPIXEL* type at position (r,c) from a given PIXEL in an IMAGE
+ * @brief NOTE: position (0,0) represent the top left corner of the image
+ * 
+ * @param r row in image
+ * @param c column in image
+ * @param img pointer to an IMAGE type
+ * @return GPIXEL* type | NULL if (r,c) is out of bounds
+ */
+GPIXEL* get_gpixel(int r, int c, IMAGE* img);
+
 
 /**
  * @brief Sets a PIXEL type at position (r,c) in the image
@@ -55,5 +82,25 @@ PIXEL* get_pixel(int r, int c, IMAGE* img);
  * @returns pointer to placed pixel | NULL if (r,c) out of bounds
  */
 PIXEL* set_pixel(int r, int c, PIXEL* px, IMAGE* img);
+
+/**
+ * @brief Sets the RGB value of an RGBPIXEL
+ * 
+ * @param px pointer towards an RGBPIXEL type
+ * @param R red value
+ * @param G green value
+ * @param B blue value
+ * @return RGBPIXEL* towards pixel that was written to | NULL if (r,c) out of bounds
+ */
+void set_rgbpixel(RGBPIXEL* px, BYTE R, BYTE G, BYTE B);
+
+/**
+ * @brief Sets the gray value of a GPIXEL
+ * 
+ * @param px pointer towards a GPIXEL
+ * @param V gray value
+ */
+void set_gpixel(GPIXEL* px, BYTE V);
+
 
 #endif
