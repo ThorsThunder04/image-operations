@@ -5,15 +5,53 @@
 #include "imgops.h"
 
 /**
- * @brief reads PNM image from a given filename.
+ * @brief dynamic allocation of memory for pixel matrix
+ *
+ * @param width: width of the pixel matrix
+ * @param height: height of the pixel matrix
+ */
+PIXEL** pixalloc(int width, int height) {
+    // allocate all row pointers
+    PIXEL** mat = (PIXEL**)malloc(sizeof(PIXEL*)*height);
+    if (mat == NULL) {
+        printf("Error allocating memory for pixel matrix rows !\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (int r = 0; r < height; r++) {
+        // allocate all columns of a row
+        mat[r] = (PIXEL*)malloc(sizeof(PIXEL)*width);
+
+
+        if (mat[r] == NULL) {
+            printf("Error allocating memory for row %d !\n", r);
+            // de-allocate all memory of the matrix allocated up until this point
+            for (int rr = 0; rr < r; rr++) free(mat[rr]);
+            free(mat);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    return mat;
+
+}
+
+/**
+ * @brief reads PNM image from a given filename (detects wether it's PGM or PPM)
  * @brief Only supports PGM and PPM images of max pixel val 255.
  *
  * @param filename: string representing path to PNM file to open
  * @param img: destination pointer to write the IMAGE data to
  */
-void get_image(char* filename, IMAGE* img) {
+void read_pnm_image(char* filename, IMAGE* img) {
 
     FILE* imgfd = fopen(filename, "r");
+
+    if (imgfd == NULL) {
+        printf("Error opening PNM file!\n");
+        exit(EXIT_FAILURE);
+    }
+
 
     img->is_rgb = _read_pnm_type(imgfd) == 6; // PPM (rgb) type is "P6"
     unsigned int pixel_size = (img->is_rgb) ? sizeof(BYTE)*3 : sizeof(BYTE); // not using size of the pixel structures due to alignment
@@ -21,38 +59,35 @@ void get_image(char* filename, IMAGE* img) {
     _skip_comments(imgfd);
     _read_image_dimensions(imgfd, &(img->width), &(img->height));
 
-    // allocate row pointers of image
-    PIXEL** imgmat = (PIXEL**)malloc(img->height*sizeof(PIXEL*));
-    if (imgmat == NULL) {
-        printf("Error allocating image rows !\n");
-        exit(EXIT_FAILURE);
-    }
+    // allocate memory for image pixel matrice
+    img->mat = pixalloc(img->width, img->height);
 
-    // allocate and read pixel rows of image
     for (int r = 0; r < img->height; r++) {
-        imgmat[r] = (PIXEL*)malloc(img->width*sizeof(PIXEL));
-
-        // on malloc error
-        if (imgmat[r] == NULL) {
-            printf("Error allocating image row columns !\n");
-
-            // close and free allocated resources
-            fclose(imgfd);
-            for (int rr = 0; rr < r; rr++) free(imgmat[rr]);
-            free(imgmat);
-
-            exit(EXIT_FAILURE);
-        }
-
-        // can probably be done one row at a time, but I'm doing it like this rn since I've never used unions before
         for (int c = 0; c < img->width; c++) {
-            fread((void*)&(imgmat[r][c]), pixel_size, 1, imgfd);
+            fread((void*)&(img->mat[r][c]), pixel_size, 1, imgfd);
         }
     }
-    fclose(imgfd);
 
-    img->mat = imgmat;
+    fclose(imgfd);
 }
+
+/**
+ * @brief Reads PPM image from a given filename.
+ * @brief Only supports max pixel value of 255
+ *
+ * @param filename: string representing path to PPM file to open
+ * @param img: destination pointer to write the IMAGE data to
+ */
+void read_ppm_image(char* filename, IMAGE* img); // TODO Implement
+
+/**
+ * @brief Reads PPM image from a given filename.
+ * @brief Only supports max pixel value of 255
+ *
+ * @param filename: string representing path to PPM file to open
+ * @param img: destination pointer to write the IMAGE data to
+ */
+void read_pgm_image(char* filename, IMAGE* img); // TODO Implement
 
 /**
  * @brief writes a given IMAGE to a PGM file. If the image data is rgb, the grayscale pixel values will be the average of red green and blue
@@ -72,14 +107,14 @@ void write_to_pgm(char* destname, IMAGE* img) {
         for (int c = 0; c < img->width; c++) {
 
 
-            PIXEL* px = img->imgmat[r][c]
+            PIXEL* px = &img->mat[r][c];
 
             // if the IMAGE object being written is in RGB
-            if (img->is_rgb) *px = (PIXEL)rgb2g(px);
+            if (img->is_rgb) *px = (PIXEL)rgb2g(&px->cpx);
 
             fwrite(
                 (void*)px,
-                sizeof(GPIXEL),
+                sizeof(BYTE),
                 1,
                 imgfd
             );
@@ -105,16 +140,16 @@ void write_to_ppm(char* destname, IMAGE* img) {
     fprintf(imgfd, "P6\n");
     fprintf(imgfd, "%u %u 255\n", img->width, img->height);
 
-    int objSize = sizeof(RGBPIXEL);
+    int objSize = sizeof(BYTE)*3; // size of rgb pixels
     int writeSize = 1;
 
     if (!img->is_rgb) {
-        objSize = sizeof(GPIXEL);
+        objSize = sizeof(BYTE); // size of grayscale pixel
         writeSize = 3;
     }
 
     for (int r = 0; r < img->height; r++) {
-        for int c = 0; c < img->height; r++) {
+        for (int c = 0; c < img->height; r++) {
 
             /*
              * Since the size of a PIXEL union is 3 BYTEs,

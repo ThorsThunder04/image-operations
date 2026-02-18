@@ -40,15 +40,44 @@ typedef struct {
     BYTE is_rgb;
 } IMAGE;
 
+/**
+ * @brief dynamic allocation of memory for pixel matrix
+ *
+ * @param width: width of the pixel matrix
+ * @param height: height of the pixel matrix
+ *
+ * @returns PIXEL** type (beginning of matrix)
+ */
+PIXEL** pixalloc(int width, int height);
+
 
 /**
- * @brief reads PNM image from a given filename.
+ * @brief Reads PNM image from a given filename (detects wether it's PGM or PPM)
  * @brief Only supports PGM and PPM images of max pixel val 255.
  *
  * @param filename: string representing path to PNM file to open
  * @param img: destination pointer to write the IMAGE data to
  */
-void get_image(char* filename, IMAGE* img);
+void read_pnm_image(char* filename, IMAGE* img);
+
+/**
+ * @brief Reads PPM image from a given filename.
+ * @brief Only supports max pixel value of 255
+ *
+ * @param filename: string representing path to PPM file to open
+ * @param img: destination pointer to write the IMAGE data to
+ */
+void read_ppm_image(char* filename, IMAGE* img);
+
+/**
+ * @brief Reads PPM image from a given filename.
+ * @brief Only supports max pixel value of 255
+ *
+ * @param filename: string representing path to PPM file to open
+ * @param img: destination pointer to write the IMAGE data to
+ */
+void read_pgm_image(char* filename, IMAGE* img);
+
 
 /**
  * @brief writes a given IMAGE to a PGM file. If the image data is rgb, the grayscale pixel values will be the average of red green and blue

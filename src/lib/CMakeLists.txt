@@ -10,3 +10,16 @@ target_sources(imgio
         FILES
             imgio.h
 )
+
+
+add_library(imgops)
+
+target_sources(imgops
+    PRIVATE
+        imgops.c
+    PUBLIC
+        FILE_SET imgops_headers
+        TYPE HEADERS
+        FILES
+            imgops.h
+)

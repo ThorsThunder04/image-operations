@@ -42,3 +42,28 @@ GPIXEL rgb2g(RGBPIXEL* px) {
     return gpx;
 
 }
+
+/**
+ * @brief gets a PIXEL type at position (r,c) in the image
+ * @brief NOTE: position (0,0) represent the top left corner of the image
+ *
+ * @param r: row in the image
+ * @param c: column in the image
+ * @param img: pointer towards image matrix
+ *
+ * @returns PIXEL* type pointer | NULL if (r,c) is out of bounds
+ */
+PIXEL* get_pixel(int r, int c, IMAGE* img); // TODO Implement
+
+/**
+ * @brief Sets a PIXEL type at position (r,c) in the image
+ * @brief NOTE: position (0,0) represents the top left corner of the image
+ *
+ * @param r: row in the image
+ * @param c: column in the image
+ * @param px: pointer to a PIXEL type
+ * @param img: pointer to an IMAGE type
+ *
+ * @returns pointer to placed pixel | NULL if (r,c) out of bounds
+ */
+PIXEL* set_pixel(int r, int c, PIXEL* px, IMAGE* img); // TODO Implement
