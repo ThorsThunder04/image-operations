@@ -113,12 +113,12 @@ void write_ppm2ppm(char* destname, IMAGE* img);
 void free_img(IMAGE* img);
 
 /**
- * @brief De-allocates a 2D pixel array of a given size
+ * @brief De-allocates a 2D pixel matrix of a given size
  *
  * @param mat: pointer towards the 2D array
  * @param height: height of the image
  */
-void free_imgmat(PIXEL** mat, int height);
+void free_pxmat(PIXEL** mat, int height);
 
 /**
  * @brief reads the dimensions from a PNM file and stores them in a provided IMAGE pointer

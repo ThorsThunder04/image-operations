@@ -286,17 +286,17 @@ void write_ppm2ppm(char* destname, IMAGE* img) {
  */
 void free_img(IMAGE* img) {
 
-    free_imgmat(img->mat, img->height);
+    free_pxmat(img->mat, img->height);
     free(img);
 }
 
 /**
- * @brief De-allocates a 2D pixel array of a given size
+ * @brief De-allocates a 2D pixel matrix of a given size
  *
  * @param mat: pointer towards the 2D array
  * @param height: height of the image
  */
-void free_imgmat(PIXEL** mat, int height) {
+void free_pxmat(PIXEL** mat, int height) {
 
     for (int r = 0; r < height; r++) {
         free(mat[r]);
