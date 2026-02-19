@@ -128,7 +128,7 @@ void rgb2ycbcr(PIXEL* px);
 /**
  * @brief Converts pixel from RGB colors space to Luma (read via GPIXEL type)
  * 
- * @param px 
+ * @param px the pixel to convert
  */
 void rgb2luma(PIXEL* px);
 

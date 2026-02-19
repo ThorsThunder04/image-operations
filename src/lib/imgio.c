@@ -5,14 +5,7 @@
 #include <imgio.h>
 #include <imgops.h>
 
-/**
- * @brief dynamic allocation of memory for pixel matrix
- *
- * @param width: width of the pixel matrix
- * @param height: height of the pixel matrix
- *
- * @returns PIXEL** type (beginning of matrix) | NULL if dynamic allocation failed (refer to malloc of stdlib.h)
- */
+
 PIXEL** pxalloc(int width, int height) {
     // allocate all row pointers
     PIXEL** mat = (PIXEL**)malloc(sizeof(PIXEL*)*height);
@@ -42,13 +35,6 @@ PIXEL** pxalloc(int width, int height) {
 }
 
 
-/**
- * @brief Reads PPM image from a given filename.
- * @brief Only supports max pixel value of 255
- *
- * @param filename: string representing path to PPM file to open
- * @param img: destination pointer to write the IMAGE data to
- */
 void read_ppm_image(char* filename, IMAGE* img) {
 
     FILE* imgfd = fopen(filename, "rb");
@@ -59,8 +45,8 @@ void read_ppm_image(char* filename, IMAGE* img) {
         exit(EXIT_FAILURE);
     }
 
+    // make sure the file being read is in PPM format
     IMGTYPE it = _read_pnm_type(imgfd);
-
     if (it != PPM) {
         printf("Incorrect file type! Tried opening PPM, P%d type recieved!\n", it);
         fclose(imgfd);
@@ -80,6 +66,7 @@ void read_ppm_image(char* filename, IMAGE* img) {
         fclose(imgfd);
     }
 
+    // go over every pixel in the image file and add it to the matrix
     for (int r = 0; r < height; r++) {
         for (int c = 0; c < width; c++) {
 
@@ -89,6 +76,7 @@ void read_ppm_image(char* filename, IMAGE* img) {
                 1,
                 imgfd
             );
+
             if (res < 1) {
                 if (feof(imgfd)) {
                     printf("Error: unexpectedly reached end of file in %s !\n", filename);
@@ -103,16 +91,8 @@ void read_ppm_image(char* filename, IMAGE* img) {
 
     img->width = width;
     img->height = height;
-
 }
 
-/**
- * @brief Reads PGM image from a given filename.
- * @brief Only supports max pixel value of 255
- *
- * @param filename: string representing path to PGM file to open
- * @param img: destination pointer to write the IMAGE data to
- */
 void read_pgm_image(char* filename, IMAGE* img) {
 
     FILE* imgfd = fopen(filename, "rb");
@@ -123,8 +103,8 @@ void read_pgm_image(char* filename, IMAGE* img) {
         exit(EXIT_FAILURE);
     }
 
+    // make sure the file being read is a PGM type
     IMGTYPE it = _read_pnm_type(imgfd);
-
     if (it != PGM) {
         printf("Incorrect file type! Tried opening PGM, P%d type recieved!\n", it);
         fclose(imgfd);
@@ -144,8 +124,10 @@ void read_pgm_image(char* filename, IMAGE* img) {
         fclose(imgfd);
     }
 
+    // go over every pixel in the image file and add it to the matrix
     for (int r = 0; r < height; r++) {
         for (int c = 0; c < width; c++) {
+
             int res = fread(
                 (void*)&img->mat[r][c],
                 sizeof(GPIXEL),
@@ -169,12 +151,6 @@ void read_pgm_image(char* filename, IMAGE* img) {
     img->height = height;
 }
 
-/**
- * @brief writes a given IMAGE to a PGM file.
- *
- * @param destname: pathname of the image file to write
- * @param img: IMAGE data to write to file
- */
 void write_pgm2pgm(char* destname, IMAGE* img) {
 
     FILE* imgfd = fopen(destname, "wb");
@@ -201,12 +177,6 @@ void write_pgm2pgm(char* destname, IMAGE* img) {
     fclose(imgfd);
 }
 
-/**
- * @brief writes a given image to a PPM file.
- *
- * @param destname: pathname of the image file to write
- * @param img: IMAGE data to write to file
- */
 void write_ppm2ppm(char* destname, IMAGE* img) {
 
     FILE* imgfd = fopen(destname, "wb");
@@ -240,24 +210,12 @@ void write_ppm2ppm(char* destname, IMAGE* img) {
     fclose(imgfd);
 }
 
-/**
- * @brief De-allocates the dynamically allocated parts of an IMAGE structure
- * @brief NOTE: this only de-alloactes the pixel matrix part of an image. If the rest of the structure was dynamically allocated, it must be freed separately.
- *
- * @param img: pointer towards previously allocated image structure
- */
 void free_img(IMAGE* img) {
 
     free_pxmat(img->mat, img->height);
     free(img);
 }
 
-/**
- * @brief De-allocates a 2D pixel matrix of a given size
- *
- * @param mat: pointer towards the 2D array
- * @param height: height of the image
- */
 void free_pxmat(PIXEL** mat, int height) {
 
     for (int r = 0; r < height; r++) {
@@ -268,12 +226,6 @@ void free_pxmat(PIXEL** mat, int height) {
     *mat = NULL;
 }
 
-/**
- * @brief reads the dimensions from a PNM file and stores them in a provided IMAGE pointer
- *
- * @param filename: path to the PNM image
- * @param img: pointer towards an IMAGE type to store the width and height
- */
 void get_image_dimensions(char* filename, IMAGE* img) {
 
     FILE* imgfd = fopen(filename, "rb");
@@ -284,12 +236,6 @@ void get_image_dimensions(char* filename, IMAGE* img) {
     fclose(imgfd);
 }
 
-/**
- * @brief copies an IMAGE type into another IMAGE (including allocation of the pixel matrix)
- *
- * @param dest where to copy the image to
- * @param src the image to copy
- */
 void img_copy(IMAGE* dest, IMAGE* src) {
 
     // copies the initial structure
@@ -301,14 +247,6 @@ void img_copy(IMAGE* dest, IMAGE* src) {
 
 }
 
-/**
- * @brief copies a 2D pixel matrix
- *
- * @param dest where to copy the matrix to (must already have the necessary allocated space, otherwise seg fault)
- * @param src  the matrix to copy
- * @param width width of the matrix
- * @param height height of the matrix
- */
 void pxmat_copy(PIXEL** dest, PIXEL** src, int width, int height) {
 
     // copy each row of pixels from src to dest
@@ -318,12 +256,6 @@ void pxmat_copy(PIXEL** dest, PIXEL** src, int width, int height) {
 }
 
 
-/**
- * @brief Extracts the red channel from an RGBPIXEL image and places it in a GPIXEL image
- *
- * @param dest destination image
- * @param src  source image
- */
 void extr_rchan2img(IMAGE* dest, IMAGE* src) {
     // yeah yeah it's just a wrapper, idc
 
@@ -331,14 +263,6 @@ void extr_rchan2img(IMAGE* dest, IMAGE* src) {
 
 }
 
-/**
- * @brief Extracts the red channel from an 2D (RGB)PIXEL matrix and places it in a (G)PIXEL matrix
- *
- * @param dest destination matrix
- * @param src source matrix
- * @param width width of the matrix
- * @param height height of the matrix
- */
 void extr_rchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
     /*
     This operation is sort of redundant in a sense, as since PIXEL is a union, the location of R
@@ -354,26 +278,12 @@ void extr_rchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
     }
 }
 
-/**
- * @brief Extracts the green channel from an RGBPIXEL image and places it in a GPIXEL image
- *
- * @param dest destination image
- * @param src  source image
- */
 void extr_gchan2img(IMAGE* dest, IMAGE* src) {
 
     extr_gchan2pxmat(dest->mat, src->mat, src->width, src->height);
 
 }
 
-/**
- * @brief Extracts the green channel from an 2D (RGB)PIXEL matrix and places it in a (G)PIXEL matrix
- *
- * @param dest destination matrix
- * @param src source matrix
- * @param width width of the matrix
- * @param height height of the matrix
- */
 void extr_gchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
 
     // for each pixel, extract the green channel from src, and place it in the grey channel of dest
@@ -384,26 +294,12 @@ void extr_gchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
     }
 }
 
-/**
- * @brief Extracts the blue channel from an RGBPIXEL image and places it in a GPIXEL image
- *
- * @param dest destination image
- * @param src  source image
- */
 void extr_bchan2img(IMAGE* dest, IMAGE* src) {
 
     extr_bchan2pxmat(dest->mat, src->mat, src->width, src->height);
 
 }
 
-/**
- * @brief Extracts the blue channel from an 2D (RGB)PIXEL matrix and places it in a (G)PIXEL matrix
- *
- * @param dest destination matrix
- * @param src source matrix
- * @param width width of the matrix
- * @param height height of the matrix
- */
 void extr_bchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
 
     // for each pixel, extract the blue channel from src, and place it in the grey channel of dest
@@ -418,9 +314,6 @@ void extr_bchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////
 
-/**
- * @brief skips whitespace in a file descriptor. After execution is done, the cursor is pointing on the first next non whitespace character.
- */
 void _skip_whitespace(FILE* fd) {
     char c;
 
@@ -435,10 +328,6 @@ void _skip_whitespace(FILE* fd) {
 
 }
 
-/**
- * @brief skips whatever comments there is between the magic number and the beginning of the data
- * @brief NOTE: assums PNM type has already been read
- */
 void _skip_comments(FILE* fd) {
     char c;
     _skip_whitespace(fd);
@@ -453,10 +342,6 @@ void _skip_comments(FILE* fd) {
     ungetc(c, fd);
 }
 
-/**
- * @brief reads an image's dimesions from an open file
- * @brief NOTE: assumes PNM type and comments have already been read
- */
 void _read_image_dimensions(FILE* fd, unsigned int* width, unsigned int* height) {
 
     int maxval;
@@ -465,12 +350,6 @@ void _read_image_dimensions(FILE* fd, unsigned int* width, unsigned int* height)
     fscanf(fd, "%u %u %u%*c", width, height, &maxval);
 }
 
-/**
- * @brief returns an integer `n` representing the number in a pnm's file's Pn which descripes what kind of pnm file it is.
- * @brief Must be executed starting at the beginning of the file.
- *
- * @param fd: pointer towards the open file descriptor
- */
 IMGTYPE _read_pnm_type(FILE* fd) {
     IMGTYPE t;
 
