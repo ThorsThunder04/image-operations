@@ -41,44 +41,6 @@ PIXEL** pxalloc(int width, int height) {
 
 }
 
-/**
- * @brief reads PNM image from a given filename (detects wether it's PGM or PPM)
- * @brief Only supports PGM and PPM images of max pixel val 255.
- * 
- * ! this function should really get deprecated soon
- *
- * @param filename: string representing path to PNM file to open
- * @param img: destination pointer to write the IMAGE data to
- */
-void read_pnm_image(char* filename, IMAGE* img) {
-
-    FILE* imgfd = fopen(filename, "rb");
-
-    // check that file exists
-    if (imgfd == NULL) {
-        printf("Error opening PNM file!\n");
-        exit(EXIT_FAILURE);
-    }
-
-
-    img->img_type = _read_pnm_type(imgfd); // PPM (rgb) type is "P6"
-    unsigned int pixel_size = (img->img_type == PPM) ? sizeof(BYTE)*3 : sizeof(BYTE); // not using size of the pixel structures due to alignment
-
-    _skip_comments(imgfd);
-    _read_image_dimensions(imgfd, &(img->width), &(img->height));
-
-
-    // allocate memory for image pixel matrice
-    img->mat = pxalloc(img->width, img->height);
-
-    for (int r = 0; r < img->height; r++) {
-        for (int c = 0; c < img->width; c++) {
-            fread((void*)&(img->mat[r][c]), pixel_size, 1, imgfd);
-        }
-    }
-
-    fclose(imgfd);
-}
 
 /**
  * @brief Reads PPM image from a given filename.
@@ -323,8 +285,8 @@ void get_image_dimensions(char* filename, IMAGE* img) {
 }
 
 /**
- * @brief copies an image into another pointer (including allocation of the pixel matrix)
- * 
+ * @brief copies an IMAGE type into another IMAGE (including allocation of the pixel matrix)
+ *
  * @param dest where to copy the image to
  * @param src the image to copy
  */
@@ -341,7 +303,7 @@ void img_copy(IMAGE* dest, IMAGE* src) {
 
 /**
  * @brief copies a 2D pixel matrix
- * 
+ *
  * @param dest where to copy the matrix to (must already have the necessary allocated space, otherwise seg fault)
  * @param src  the matrix to copy
  * @param width width of the matrix
@@ -358,7 +320,7 @@ void pxmat_copy(PIXEL** dest, PIXEL** src, int width, int height) {
 
 /**
  * @brief Extracts the red channel from an RGBPIXEL image and places it in a GPIXEL image
- * 
+ *
  * @param dest destination image
  * @param src  source image
  */
@@ -371,7 +333,7 @@ void extr_rchan2img(IMAGE* dest, IMAGE* src) {
 
 /**
  * @brief Extracts the red channel from an 2D (RGB)PIXEL matrix and places it in a (G)PIXEL matrix
- * 
+ *
  * @param dest destination matrix
  * @param src source matrix
  * @param width width of the matrix
@@ -394,7 +356,7 @@ void extr_rchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
 
 /**
  * @brief Extracts the green channel from an RGBPIXEL image and places it in a GPIXEL image
- * 
+ *
  * @param dest destination image
  * @param src  source image
  */
@@ -406,7 +368,7 @@ void extr_gchan2img(IMAGE* dest, IMAGE* src) {
 
 /**
  * @brief Extracts the green channel from an 2D (RGB)PIXEL matrix and places it in a (G)PIXEL matrix
- * 
+ *
  * @param dest destination matrix
  * @param src source matrix
  * @param width width of the matrix
@@ -424,7 +386,7 @@ void extr_gchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
 
 /**
  * @brief Extracts the blue channel from an RGBPIXEL image and places it in a GPIXEL image
- * 
+ *
  * @param dest destination image
  * @param src  source image
  */
@@ -436,7 +398,7 @@ void extr_bchan2img(IMAGE* dest, IMAGE* src) {
 
 /**
  * @brief Extracts the blue channel from an 2D (RGB)PIXEL matrix and places it in a (G)PIXEL matrix
- * 
+ *
  * @param dest destination matrix
  * @param src source matrix
  * @param width width of the matrix
