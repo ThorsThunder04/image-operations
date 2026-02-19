@@ -5,7 +5,7 @@
 
 /**
  * @brief returns wether (r,c) is within the bounds of img
- * 
+ *
  * @param r row in image
  * @param c column in image
  * @param img image we're verifying the bounds of
@@ -50,7 +50,7 @@ PIXEL* get_pixel(int r, int c, IMAGE* img);
 /**
  * @brief gits the RGBPIXEL* type at position (r,c) from a given PIXEL in an IMAGE
  * @brief NOTE: position (0,0) represent the top left corner of the image
- * 
+ *
  * @param r row in image
  * @param c column in image
  * @param img pointer to an IMAGE type
@@ -61,7 +61,7 @@ RGBPIXEL* get_rgbpixel(int r, int c, IMAGE* img);
 /**
  * @brief gits the GPIXEL* type at position (r,c) from a given PIXEL in an IMAGE
  * @brief NOTE: position (0,0) represent the top left corner of the image
- * 
+ *
  * @param r row in image
  * @param c column in image
  * @param img pointer to an IMAGE type
@@ -85,7 +85,7 @@ PIXEL* set_pixel(int r, int c, PIXEL* px, IMAGE* img);
 
 /**
  * @brief Sets the RGB value of an RGBPIXEL
- * 
+ *
  * @param px pointer towards an RGBPIXEL type
  * @param R red value
  * @param G green value
@@ -96,11 +96,63 @@ void set_rgbpixel(RGBPIXEL* px, BYTE R, BYTE G, BYTE B);
 
 /**
  * @brief Sets the gray value of a GPIXEL
- * 
+ *
  * @param px pointer towards a GPIXEL
  * @param V gray value
  */
 void set_gpixel(GPIXEL* px, BYTE V);
+
+
+/**
+ * @brief Applies a pixel operation to an entire image ( `op` takes in a PIXEL pointer, and does some operations on it)
+ * 
+ * @param op pointer towards pixel operation function
+ * @param img image to do the operations on
+ */
+void apply_chan2img(void (*op)(PIXEL*), IMAGE* img);
+
+/**
+ * @brief Converts pixel from RGB color space to YUV
+ * 
+ * @param px the pixel to convert
+ */
+void rgb2yuv(PIXEL* px);
+
+/**
+ * @brief Converts pixel from RGB color space to YCbCr
+ * 
+ * @param px the pixel to convert
+ */
+void rgb2ycbcr(PIXEL* px);
+
+/**
+ * @brief Converts pixel from RGB colors space to Luma (read via GPIXEL type)
+ * 
+ * @param px 
+ */
+void rgb2luma(PIXEL* px);
+
+/**
+ * @brief Converts image from RGB color space to YUV
+ * 
+ * @param img Image to convert
+ */
+void rgb2yuvimg(IMAGE* img);
+
+/**
+ * @brief Converts image from RGB color space to YCbCr
+ * 
+ * @param img Image to convert
+ */
+void rgb2ycbcrimg(IMAGE* img);
+
+/**
+ * @brief Converts image from RGB color space to Luma ( => sets image type of `img` to PGM)
+ * 
+ * @param img Image to convert
+ */
+void rgb2lumaimg(IMAGE* img);
+
 
 
 #endif
