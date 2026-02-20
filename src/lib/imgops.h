@@ -2,6 +2,34 @@
 #define IMAGE_OPS_H
 #include "imgio.h"
 
+// no conversions from gray to anything else (as there's only gray)
+typedef enum {
+    // RGB source conversions
+    RGB2GRAY = 0,
+    RGB2YUV,
+    RGB2YCBCR,
+    RGB2HSV,
+
+    // YUV source conversions
+    YUV2RGB,
+    YUV2GRAY,
+    YUV2YCBCR,
+    YUV2HSV,
+
+    // YCBCR source conversions
+    YCBCR2RGB,
+    YCBCR2YUV,
+    YCBCR2GRAY,
+    YCBCR2HSV,
+
+    // HSV source conversions
+    HSV2RGB,
+    HSV2GRAY,
+    HSV2YCBCR,
+    HSV2YUV,
+
+    _CONVEND
+} CONVTYPE;
 
 /**
  * @brief returns wether (r,c) is within the bounds of img
@@ -30,9 +58,6 @@ RGBPIXEL g2rgb(GPIXEL* px);
  * @returns an GPIXEL type
  */
 GPIXEL rgb2g(RGBPIXEL* px);
-
-// PIXEL torgb(PIXEL* px);
-// PIXEL togray(PIXEL* px);
 
 /**
  * @brief gets a PIXEL* type at position (r,c) in an IMAGE
@@ -104,54 +129,40 @@ void set_gpixel(GPIXEL* px, BYTE V);
 
 
 /**
- * @brief Applies a pixel operation to an entire image ( `op` takes in a PIXEL pointer, and does some operations on it)
+ * @brief Converts the pixel from `srcpx` to a different color space specified by `conv` and writes the converted pixel values in `destpx` (can be same as `srxpx`)
  * 
- * @param op pointer towards pixel operation function
- * @param img image to do the operations on
+ * @param destpx pixel to write converted values to
+ * @param srcpx pixel to convert the values from
+ * @param conv colorspace conversion type (ex: RGB2HSV)
  */
-void apply_chan2img(void (*op)(PIXEL*), IMAGE* img);
+void convert_pxchan(PIXEL* destpx, PIXEL* srcpx, CONVTYPE conv);
+
 
 /**
- * @brief Converts pixel from RGB color space to YUV
+ * @brief Converts the pixels from `srcimg` to a different color space specified by `conv` and writes the convereted pixels to `destimg` (can be same as `srcimg`)
  * 
- * @param px the pixel to convert
+ * @param destimg image to write all the converted pixels to
+ * @param srcimg image to convert the pixels from
+ * @param conv colorspace conversion type (ex: `RGB2HSV`)
+ * 
+ * @returns `int` `0` if success. `-1` if `conv` is a non existant conversion type. `-2` if out of bounds error on `destimg` (at least one of `srcimg`'s dimensions are bigger than those of `destimg`'s).
  */
-void rgb2yuv(PIXEL* px);
+int convert_imgchan(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv);
 
 /**
- * @brief Converts pixel from RGB color space to YCbCr
+ * @brief Converts the pixels from `srcimg` to a different color space specified by `conv` within a given rectangular range, then writes the converted pixels to `destimg`
  * 
- * @param px the pixel to convert
- */
-void rgb2ycbcr(PIXEL* px);
-
-/**
- * @brief Converts pixel from RGB colors space to Luma (read via GPIXEL type)
+ * @param destimg image to write the converted pixels to
+ * @param srcimg  image to convert the pixels from
+ * @param conv colorspace conversion type (ex: RGB2HSV)
+ * @param r1 start row
+ * @param c1 start column
+ * @param r2 end row (inclusive)
+ * @param c2 end column (inclusive)
  * 
- * @param px the pixel to convert
+ * @returns `int` `0` if success. `-1` if `conv` is a non existant conversion type. `-2` if out of bounds error on `destimg`. `-3` if out of bounds error on `srcimg`
  */
-void rgb2luma(PIXEL* px);
-
-/**
- * @brief Converts image from RGB color space to YUV
- * 
- * @param img Image to convert
- */
-void rgb2yuvimg(IMAGE* img);
-
-/**
- * @brief Converts image from RGB color space to YCbCr
- * 
- * @param img Image to convert
- */
-void rgb2ycbcrimg(IMAGE* img);
-
-/**
- * @brief Converts image from RGB color space to Luma ( => sets image type of `img` to PGM)
- * 
- * @param img Image to convert
- */
-void rgb2lumaimg(IMAGE* img);
+int convert_imgchanrange(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv, int r1, int c1, int r2, int c2);
 
 
 
