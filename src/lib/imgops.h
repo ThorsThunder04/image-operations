@@ -3,7 +3,7 @@
 #include "imgio.h"
 
 // no conversions from gray to anything else (as there's only gray)
-typedef enum {
+enum _channel_conversion_type_enum {
     
     // MISC conversions
     GRAY2RGB = 0, // this just places the R channel across all 3 channels
@@ -37,7 +37,8 @@ typedef enum {
 
     //! Is just used for enum type checking
     _CONVEND
-} CONVTYPE;
+};
+typedef enum _channel_conversion_type_enum CONVTYPE;
 
 /**
  * @brief returns wether (r,c) is within the bounds of img

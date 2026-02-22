@@ -8,30 +8,35 @@ typedef unsigned char BYTE;
 
 
 // the size of a grayscale pixel
-typedef struct {
+
+struct _gray_pixel_type_struct {
     BYTE v;
-} GPIXEL;
+};
+typedef struct _gray_pixel_type_struct GPIXEL;
 
 /** the size of a Red,Green,Blue pixel */
-typedef struct {
+struct _rgb_pixel_type_struct {
     BYTE r;
     BYTE g;
     BYTE b;
-} RGBPIXEL;
+};
+typedef struct _rgb_pixel_type_struct RGBPIXEL;
 
 // used for pseudo-inheritance
-typedef union {
+union _pixel_type_enum {
     GPIXEL gpx;
     RGBPIXEL cpx;
-} PIXEL;
+};
+typedef union _pixel_type_enum PIXEL;
 
-typedef enum {
+enum _pnm_image_type_enum {
     PBM = 4,
     PGM,
     PPM,
     PAM
 
-} IMGTYPE;
+};
+typedef enum _pnm_image_type_enum IMGTYPE;
 
 /**
  * @brief structual definition of a multi channel pixel
@@ -41,12 +46,13 @@ typedef enum {
  * @member mat: 2D array of pixels. type PIXEL is either of type GPIXEL or RGBPIXEL. Can be checked from is_rgb
  * @member is_rgb: boolean value to check what kind of pixel structures are in `mat`
  */
-typedef struct {
+struct _image_type_struct {
     unsigned int width;
     unsigned int height;
     PIXEL** mat;
     IMGTYPE img_type;
-} IMAGE;
+};
+typedef struct _image_type_struct IMAGE;
 
 /**
  * @brief dynamic allocation of memory for pixel matrix
