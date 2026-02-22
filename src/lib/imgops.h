@@ -181,16 +181,16 @@ void bin_rgbthresh_img(IMAGE* img, int rthresh, int gthresh, int bthresh, BYTE u
 
 
 /**
- * @brief Erodes pixels in a `range` "radius" square around (r,c)
+ * @brief Erodes pixels in a `radius` square around (r,c)
  * 
  * @param r row in image
  * @param c column in image
  * @param destimg image to apply the erosion to
  * @param srcimg image to use to calculate erosion values
- * @param range radius of erosion
+ * @param radius how far to erode around `(r,c)` (in a square)
  * @return int number of pixels effectively erroded (less than range*range if some are out of bounds)
  */
-int erode_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int range);
+int erode_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int radius);
 
 /**
  * @brief Dialtes pixels in a `range` "radius" square around (r,c)
@@ -199,17 +199,47 @@ int erode_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int range);
  * @param c column in image
  * @param destimg image to apply the dilation to
  * @param srcimg image to use to calculate dilation values
- * @param range radius of dilations
+ * @param radius how far to dilate around `(r,c)` (in a square)
  * @return int number of pixels effectively dilated (less than range*range if some are out of bounds)
  */
-int dilate_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int range);
+int dilate_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int radius);
 
 
-int erode_img(IMAGE* destimg, IMAGE* srcimg);
-int dilate_img(IMAGE* destimg, IMAGE* srcimg);
+/**
+ * @brief Errodes an entire image with the given range
+ * 
+ * @param destimg image to write the erosion to
+ * @param srcimg the image to erode
+ * @param radius how far to erode around each pixel
+ */
+void erode_img(IMAGE* destimg, IMAGE* srcimg, unsigned int radius);
 
-int fermeture_img(IMAGE* destimg, IMAGE* srcimg);
-int ouverture_img(IMAGE* destimg, IMAGE* srcimg);
+/**
+ * @brief Dilates an entire image with the given range
+ * 
+ * @param destimg image to write the dilation to
+ * @param srcimg the image to dilate
+ * @param radius how far to dilate around each pixel
+ */
+void dilate_img(IMAGE* destimg, IMAGE* srcimg, unsigned int radius);
+
+/**
+ * @brief Applies a dilation then an erosion to an image
+ * 
+ * @param destimg resulting image
+ * @param srcimg source image to start the process on
+ * @param radius how far to dialte and erode around each pixel
+ */
+void fermeture_img(IMAGE* destimg, IMAGE* srcimg, unsigned int radius);
+
+/**
+ * @brief Applies an erosion then a dilation to an image
+ * 
+ * @param destimg resulting image
+ * @param srcimg source image to start the process on
+ * @param radius how far to dialte and erode around each pixel
+ */
+void ouverture_img(IMAGE* destimg, IMAGE* srcimg, unsigned int radius);
 
 
 #endif

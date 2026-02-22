@@ -148,13 +148,13 @@ void bin_rgbthresh_img(IMAGE* img, int rthresh, int gthresh, int bthresh, BYTE u
 
 }
 
-int erode_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int range) {
+int erode_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int radius) {
 
     int effective_errosions = 0;
 
     if (get_gpixel(r,c,srcimg)->v == 0) {
-        for (int rr = r-range; rr <= r+range; rr++) {
-            for (int cc = c-range; cc <= c+range; cc++) {
+        for (int rr = r-radius; rr <= r+radius; rr++) {
+            for (int cc = c-radius; cc <= c+radius; cc++) {
                 GPIXEL* px = get_gpixel(rr,cc,destimg);
 
                 if (px != NULL) {
@@ -169,13 +169,13 @@ int erode_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int range) {
 }
 
 
-int dilate_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int range){
+int dilate_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int radius){
 
     int effective_dilations = 0;
 
     if (get_gpixel(r,c,srcimg)->v == 255) {
-        for (int rr = r-range; rr <= r+range; rr++) {
-            for (int cc = c-range; cc <= c+range; cc++) {
+        for (int rr = r-radius; rr <= r+radius; rr++) {
+            for (int cc = c-radius; cc <= c+radius; cc++) {
                 GPIXEL* px = get_gpixel(rr,cc,destimg);
 
                 if (px != NULL) {
@@ -188,6 +188,85 @@ int dilate_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int range){
 
     return effective_dilations;
 }
+
+/**
+ * @brief Errodes an entire image with the given radius
+ * 
+ * @param destimg image to write the erosion to
+ * @param srcimg the image to erode
+ * @param radius how far to erode around each pixel
+ */
+void erode_img(IMAGE* destimg, IMAGE* srcimg, unsigned int radius) {
+
+    // copies the current contents of srcimg into the destination
+    copy_pxmat(
+        destimg->mat,
+        srcimg->mat,
+        srcimg->width,
+        srcimg->height
+    );
+
+    // apply the erosion to each individual pixel
+    for (int r = 0; r < srcimg->height; r++) {
+        for (int c = 0; c < srcimg->width; c++) {
+            erode_px(r, c, destimg, srcimg, radius);
+        }
+    }
+}
+
+/**
+ * @brief Dilates an entire image with the given radius
+ * 
+ * @param destimg image to write the dilation to
+ * @param srcimg the image to dilate
+ * @param radius how far to dilate around each pixel
+ */
+void dilate_img(IMAGE* destimg, IMAGE* srcimg, unsigned int radius) {
+    // copies the current contents of srcimg into the destination
+    copy_pxmat(
+        destimg->mat,
+        srcimg->mat,
+        srcimg->width,
+        srcimg->height
+    );
+
+    // apply the erosion to each individual pixel
+    for (int r = 0; r < srcimg->height; r++) {
+        for (int c = 0; c < srcimg->width; c++) {
+            dilate_px(r, c, destimg, srcimg, radius);
+        }
+    }
+}
+
+
+void fermeture_img(IMAGE* destimg, IMAGE* srcimg, unsigned int radius) {
+
+    // temporary image for holding the first dilation
+    IMAGE tempimg;
+    copy_img(&tempimg, srcimg);
+
+
+    dilate_img(&tempimg, srcimg, radius);
+
+    erode_img(destimg, &tempimg, radius);
+
+    free_pxmat(tempimg.mat, tempimg.height);
+}
+
+void ouverture_img(IMAGE* destimg, IMAGE* srcimg, unsigned int radius) {
+
+    // temporary image for holding the first erosion
+    IMAGE tempimg;
+    copy_img(&tempimg, srcimg);
+
+
+    erode_img(&tempimg, srcimg, radius);
+
+    dilate_img(destimg, &tempimg, radius);
+
+    free_pxmat(tempimg.mat, tempimg.height);
+}
+
 
 // This function will remain at the end as I think it will be the longest one
 int convert_channel_px(PIXEL* destpx, PIXEL* srcpx, CONVTYPE conv) {
