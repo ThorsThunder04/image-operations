@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
 
     read_ppm_image(argv[1], &img);
 
-    bin_rgbthreshimg(&img, rthresh, gthresh, bthresh, 0, 255);
+    bin_rgbthresh_img(&img, rthresh, gthresh, bthresh, 0, 255);
 
     write_ppm2ppm(argv[2], &img);
 

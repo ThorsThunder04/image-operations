@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
     // write Cb.pgm file
     printf("Writing Cb file...");
     // moves green channel to the position of red, which is same position as grayscale value
-    extr_gchan2img(&inImg, &inImg);
+    extr_gchan_img(&inImg, &inImg);
 
     filepath[0] = '\0';
     strcat(filepath, argv[2]);
@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
 
     // write Cr.pgm file
     printf("Writing Cr file...");
-    extr_bchan2img(&inImg, &inImg);
+    extr_bchan_img(&inImg, &inImg);
 
     filepath[0] = '\0';
     strcat(filepath, argv[2]);

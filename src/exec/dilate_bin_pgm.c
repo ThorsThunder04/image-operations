@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     read_pgm_image(argv[1], &srcimg);
 
     IMAGE destimg;
-    img_copy(&destimg, &srcimg);
+    copy_img(&destimg, &srcimg);
 
     for (int r = 0; r < srcimg.height; r++) {
         for (int c = 0; c < srcimg.width; c++) {

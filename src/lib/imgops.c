@@ -72,19 +72,19 @@ GPIXEL* get_gpixel(int r, int c, IMAGE* img) {
 
 
 
-int convert_imgchan(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv) {
+int convert_channel_img(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv) {
 
     // we do the `-1`s here because this function's range parameters are inclusive
     // so it WILL try and access the value at index `img.mat[r2][c2]`. Though this function has bound checks
     // so if we just pass in the the actual sizes of srcimg instead of indexes, we will repeatedly get
     // `-2` or `-3` return values
-    return convert_imgchanrange(destimg, srcimg, conv, 0, 0, srcimg->height-1, srcimg->width-1);
+    return convert_channel_img_range(destimg, srcimg, conv, 0, 0, srcimg->height-1, srcimg->width-1);
 
 }
 
 
 
-int convert_imgchanrange(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv, int r1, int c1, int r2, int c2) {
+int convert_channel_img_range(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv, int r1, int c1, int r2, int c2) {
 
     // catch when an untreaded `conv` value is used (the value isn't in the enum)
     if (conv < 0 || conv >= _CONVEND) {
@@ -106,7 +106,7 @@ int convert_imgchanrange(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv, int r1, i
             
             // we have already checked the bounds, so we don't need to worry about
             // the return values of the get_pixel functions here
-            convert_pxchan(
+            convert_channel_px(
                 get_pixel(r, c, destimg),
                 get_pixel(r, c, srcimg),
                 conv
@@ -119,7 +119,7 @@ int convert_imgchanrange(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv, int r1, i
 
 }
 
-void bin_gthreshimg(IMAGE* img, int thresh, BYTE underv, BYTE abovev) {
+void bin_gthresh_img(IMAGE* img, int thresh, BYTE underv, BYTE abovev) {
 
     for (int r = 0; r < img->height; r++) {
         for (int c = 0; c < img->width; c++) {
@@ -133,7 +133,7 @@ void bin_gthreshimg(IMAGE* img, int thresh, BYTE underv, BYTE abovev) {
     }
 }
 
-void bin_rgbthreshimg(IMAGE* img, int rthresh, int gthresh, int bthresh, BYTE underv, BYTE abovev) {
+void bin_rgbthresh_img(IMAGE* img, int rthresh, int gthresh, int bthresh, BYTE underv, BYTE abovev) {
     
     for (int r = 0; r < img->height; r++) {
         for (int c = 0; c < img->width; c++) {
@@ -190,7 +190,7 @@ int dilate_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int range){
 }
 
 // This function will remain at the end as I think it will be the longest one
-int convert_pxchan(PIXEL* destpx, PIXEL* srcpx, CONVTYPE conv) {
+int convert_channel_px(PIXEL* destpx, PIXEL* srcpx, CONVTYPE conv) {
     // doing all of this in a single function with an ENUM is a lot more practical then
     // writing a LOAD of different functions for each type of color channel conversion
 

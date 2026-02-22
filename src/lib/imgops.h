@@ -128,7 +128,7 @@ void set_gpixel(GPIXEL* px, BYTE V);
  * 
  * @returns int `0` if success. `-1` if `conv` is a non existant conversion type.
  */
-int convert_pxchan(PIXEL* destpx, PIXEL* srcpx, CONVTYPE conv);
+int convert_channel_px(PIXEL* destpx, PIXEL* srcpx, CONVTYPE conv);
 
 
 /**
@@ -140,7 +140,7 @@ int convert_pxchan(PIXEL* destpx, PIXEL* srcpx, CONVTYPE conv);
  * 
  * @returns `int` `0` if success. `-1` if `conv` is a non existant conversion type. `-2` if out of bounds error on `destimg` (at least one of `srcimg`'s dimensions are bigger than those of `destimg`'s).
  */
-int convert_imgchan(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv);
+int convert_channel_img(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv);
 
 /**
  * @brief Converts the pixels from `srcimg` to a different color space specified by `conv` within a given rectangular range, then writes the converted pixels to `destimg`
@@ -155,7 +155,7 @@ int convert_imgchan(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv);
  * 
  * @returns `int` `0` if success. `-1` if `conv` is a non existant conversion type. `-2` if out of bounds error on `destimg`. `-3` if out of bounds error on `srcimg`
  */
-int convert_imgchanrange(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv, int r1, int c1, int r2, int c2);
+int convert_channel_img_range(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv, int r1, int c1, int r2, int c2);
 
 /**
  * @brief Applies a binary threhold to a grayscale image (sets to 0 if strictly under threshold, else 255)
@@ -165,7 +165,7 @@ int convert_imgchanrange(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv, int r1, i
  * @param underv the value if the pixel is under the threshold
  * @param abovev the value if the pixel is above the threshold
  */
-void bin_gthreshimg(IMAGE* img, int thresh, BYTE underv, BYTE abovev);
+void bin_gthresh_img(IMAGE* img, int thresh, BYTE underv, BYTE abovev);
 
 /**
  * @brief individually applies a binary threhold to each rgb channel of an image (sets to 0 if strictly under threshold, else 255)
@@ -177,7 +177,7 @@ void bin_gthreshimg(IMAGE* img, int thresh, BYTE underv, BYTE abovev);
  * @param underv the value if the pixel is under the threshold
  * @param abovev the value if the pixel is above the threshold
  */
-void bin_rgbthreshimg(IMAGE* img, int rthresh, int gthresh, int bthresh, BYTE underv, BYTE abovev);
+void bin_rgbthresh_img(IMAGE* img, int rthresh, int gthresh, int bthresh, BYTE underv, BYTE abovev);
 
 
 /**
@@ -203,6 +203,13 @@ int erode_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int range);
  * @return int number of pixels effectively dilated (less than range*range if some are out of bounds)
  */
 int dilate_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int range);
+
+
+int erode_img(IMAGE* destimg, IMAGE* srcimg);
+int dilate_img(IMAGE* destimg, IMAGE* srcimg);
+
+int fermeture_img(IMAGE* destimg, IMAGE* srcimg);
+int ouverture_img(IMAGE* destimg, IMAGE* srcimg);
 
 
 #endif

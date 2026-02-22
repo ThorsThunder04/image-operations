@@ -235,18 +235,18 @@ void get_image_dimensions(char* filename, IMAGE* img) {
     fclose(imgfd);
 }
 
-void img_copy(IMAGE* dest, IMAGE* src) {
+void copy_img(IMAGE* dest, IMAGE* src) {
 
     // copies the initial structure
     memcpy(dest, src, sizeof(IMAGE));
 
     dest->mat = pxalloc(dest->width, dest->height);
 
-    pxmat_copy(dest->mat, src->mat, dest->width, dest->height);
+    copy_pxmat(dest->mat, src->mat, dest->width, dest->height);
 
 }
 
-void pxmat_copy(PIXEL** dest, PIXEL** src, int width, int height) {
+void copy_pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
 
     // copy each row of pixels from src to dest
     for (int r = 0; r < height; r++) {
@@ -255,14 +255,14 @@ void pxmat_copy(PIXEL** dest, PIXEL** src, int width, int height) {
 }
 
 
-void extr_rchan2img(IMAGE* dest, IMAGE* src) {
+void extr_rchan_img(IMAGE* dest, IMAGE* src) {
     // yeah yeah it's just a wrapper, idc
 
-    extr_rchan2pxmat(dest->mat, src->mat, src->width, src->height);
+    extr_rchan_pxmat(dest->mat, src->mat, src->width, src->height);
 
 }
 
-void extr_rchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
+void extr_rchan_pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
     /*
     This operation is sort of redundant in a sense, as since PIXEL is a union, the location of R
     from an RGBPIXEL is in the same position as a V from a GPIXEL. So the operation is kind of just like
@@ -277,13 +277,13 @@ void extr_rchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
     }
 }
 
-void extr_gchan2img(IMAGE* dest, IMAGE* src) {
+void extr_gchan_img(IMAGE* dest, IMAGE* src) {
 
-    extr_gchan2pxmat(dest->mat, src->mat, src->width, src->height);
+    extr_gchan_pxmat(dest->mat, src->mat, src->width, src->height);
 
 }
 
-void extr_gchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
+void extr_gchan_pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
 
     // for each pixel, extract the green channel from src, and place it in the grey channel of dest
     for (int r = 0; r < height; r++) {
@@ -293,13 +293,13 @@ void extr_gchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
     }
 }
 
-void extr_bchan2img(IMAGE* dest, IMAGE* src) {
+void extr_bchan_img(IMAGE* dest, IMAGE* src) {
 
-    extr_bchan2pxmat(dest->mat, src->mat, src->width, src->height);
+    extr_bchan_pxmat(dest->mat, src->mat, src->width, src->height);
 
 }
 
-void extr_bchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
+void extr_bchan_pxmat(PIXEL** dest, PIXEL** src, int width, int height) {
 
     // for each pixel, extract the blue channel from src, and place it in the grey channel of dest
     for (int r = 0; r < height; r++) {

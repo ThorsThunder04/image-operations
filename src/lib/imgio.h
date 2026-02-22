@@ -132,7 +132,7 @@ void get_image_dimensions(char* filename, IMAGE* img);
  * @param dest where to copy the image to
  * @param src the image to copy
  */
-void img_copy(IMAGE* dest, IMAGE* src);
+void copy_img(IMAGE* dest, IMAGE* src);
 
 /**
  * @brief copies a 2D pixel matrix
@@ -142,7 +142,7 @@ void img_copy(IMAGE* dest, IMAGE* src);
  * @param width width of the matrix
  * @param height height of the matrix
  */
-void pxmat_copy(PIXEL** dest, PIXEL** src, int width, int height);
+void copy_pxmat(PIXEL** dest, PIXEL** src, int width, int height);
 
 
 /**
@@ -151,7 +151,7 @@ void pxmat_copy(PIXEL** dest, PIXEL** src, int width, int height);
  * @param dest destination image
  * @param src  source image
  */
-void extr_rchan2img(IMAGE* dest, IMAGE* src);
+void extr_rchan_img(IMAGE* dest, IMAGE* src);
 
 /**
  * @brief Extracts the red channel from an 2D (RGB)PIXEL matrix and places it in a (G)PIXEL matrix
@@ -161,7 +161,7 @@ void extr_rchan2img(IMAGE* dest, IMAGE* src);
  * @param width width of the matrix
  * @param height height of the matrix
  */
-void extr_rchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height);
+void extr_rchan_pxmat(PIXEL** dest, PIXEL** src, int width, int height);
 
 /**
  * @brief Extracts the green channel from an RGBPIXEL image and places it in a GPIXEL image
@@ -169,7 +169,7 @@ void extr_rchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height);
  * @param dest destination image
  * @param src  source image
  */
-void extr_gchan2img(IMAGE* dest, IMAGE* src);
+void extr_gchan_img(IMAGE* dest, IMAGE* src);
 
 /**
  * @brief Extracts the green channel from an 2D (RGB)PIXEL matrix and places it in a (G)PIXEL matrix
@@ -179,7 +179,7 @@ void extr_gchan2img(IMAGE* dest, IMAGE* src);
  * @param width width of the matrix
  * @param height height of the matrix
  */
-void extr_gchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height);
+void extr_gchan_pxmat(PIXEL** dest, PIXEL** src, int width, int height);
 
 /**
  * @brief Extracts the blue channel from an RGBPIXEL image and places it in a GPIXEL image
@@ -187,7 +187,7 @@ void extr_gchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height);
  * @param dest destination image
  * @param src  source image
  */
-void extr_bchan2img(IMAGE* dest, IMAGE* src);
+void extr_bchan_img(IMAGE* dest, IMAGE* src);
 
 /**
  * @brief Extracts the blue channel from an 2D (RGB)PIXEL matrix and places it in a (G)PIXEL matrix
@@ -197,7 +197,7 @@ void extr_bchan2img(IMAGE* dest, IMAGE* src);
  * @param width width of the matrix
  * @param height height of the matrix
  */
-void extr_bchan2pxmat(PIXEL** dest, PIXEL** src, int width, int height);
+void extr_bchan_pxmat(PIXEL** dest, PIXEL** src, int width, int height);
 
 
 
