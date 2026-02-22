@@ -162,7 +162,7 @@ void write_pgm2pgm(char* destname, IMAGE* img) {
         for (int c = 0; c < img->width; c++) {
 
             int res = fwrite(
-                (void*)&img->mat[r][c].gpx,
+                (void*)&img->mat[r][c],
                 sizeof(BYTE),
                 1,
                 imgfd

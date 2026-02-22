@@ -82,6 +82,36 @@ int convert_imgchan(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv) {
 
 }
 
+void bin_gthreshimg(IMAGE* img, int thresh) {
+
+
+    for (int r = 0; r < img->height; r++) {
+        for (int c = 0; c < img->width; c++) {
+
+            GPIXEL* px = get_gpixel(r,c,img);
+
+            BYTE thresh_res = (thresh < px->v) ? 255 : 0;
+
+            set_gpixel(px, thresh_res);
+        }
+    }
+}
+
+void bin_rgbthreshimg(IMAGE* img, int rthresh, int gthresh, int bthresh) {
+    
+    for (int r = 0; r < img->height; r++) {
+        for (int c = 0; c < img->width; c++) {
+            RGBPIXEL* px = get_rgbpixel(r,c,img);
+
+
+            px->r = (px->r < rthresh) ? 0 : 255;
+            px->g = (px->g < gthresh) ? 0 : 255;
+            px->b = (px->b < bthresh) ? 0 : 255;
+        }
+    }
+
+}
+
 
 int convert_imgchanrange(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv, int r1, int c1, int r2, int c2) {
 

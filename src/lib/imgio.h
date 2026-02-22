@@ -75,11 +75,11 @@ PIXEL** pxalloc(int width, int height);
 void read_ppm_image(char* filename, IMAGE* img);
 
 /**
- * @brief Reads PPM image from a given filename.
+ * @brief Reads PGM image from a given filename.
  * @brief Only supports max pixel value of 255
  *
- * @param filename: string representing path to PPM file to open
- * @param img: destination pointer to write the IMAGE data to
+ * @param filename string representing path to PGM file to open
+ * @param img destination pointer to write the IMAGE data to
  */
 void read_pgm_image(char* filename, IMAGE* img);
 
@@ -103,7 +103,7 @@ void write_ppm2ppm(char* destname, IMAGE* img);
 
 /**
  * @brief De-allocates the dynamically allocated parts of an IMAGE structure
- * @brief NOTE: this only de-alloactes the pixel matrix part of an image. If the rest of the structure was dynamically allocated, it must be freed separately.
+ * @brief NOTE: This attempts to free both `img` and it's pixel matrix. If you only need to free the pixel matrix, use `free_pxmat()`
  *
  * @param img: pointer towards previously created image structure
  */

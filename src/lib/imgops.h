@@ -157,6 +157,22 @@ int convert_imgchan(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv);
  */
 int convert_imgchanrange(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv, int r1, int c1, int r2, int c2);
 
+/**
+ * @brief Applies a binary threhold to a grayscale image (sets to 0 if strictly under threshold, else 255)
+ * 
+ * @param img grayscale image to apply the threhold to
+ * @param thresh the threshold bound
+ */
+void bin_gthreshimg(IMAGE* img, int thresh);
 
+/**
+ * @brief individually applies a binary threhold to each rgb channel of an image (sets to 0 if strictly under threshold, else 255)
+ * 
+ * @param img grayscale image to apply the threhold to
+ * @param rthresh the red threshold bound
+ * @param gthresh the green threshold bound
+ * @param bthresh the blue threshold bound
+ */
+void bin_rgbthreshimg(IMAGE* img, int rthresh, int gthresh, int bthresh);
 
 #endif

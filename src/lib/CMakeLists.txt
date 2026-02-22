@@ -25,4 +25,3 @@ target_sources(imgops
 )
 
 target_link_libraries(imgops PRIVATE imgio)
-target_link_libraries(imgio PRIVATE imgops)
