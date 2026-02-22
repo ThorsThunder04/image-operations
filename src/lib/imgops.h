@@ -76,7 +76,7 @@ PIXEL* get_pixel(int r, int c, IMAGE* img);
 RGBPIXEL* get_rgbpixel(int r, int c, IMAGE* img);
 
 /**
- * @brief gits the GPIXEL* type at position (r,c) from a given PIXEL in an IMAGE
+ * @brief gets the GPIXEL* type at position (r,c) from a given PIXEL in an IMAGE
  * @brief NOTE: position (0,0) represent the top left corner of the image
  *
  * @param r row in image
@@ -162,8 +162,10 @@ int convert_imgchanrange(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv, int r1, i
  * 
  * @param img grayscale image to apply the threhold to
  * @param thresh the threshold bound
+ * @param underv the value if the pixel is under the threshold
+ * @param abovev the value if the pixel is above the threshold
  */
-void bin_gthreshimg(IMAGE* img, int thresh);
+void bin_gthreshimg(IMAGE* img, int thresh, BYTE underv, BYTE abovev);
 
 /**
  * @brief individually applies a binary threhold to each rgb channel of an image (sets to 0 if strictly under threshold, else 255)
@@ -172,7 +174,35 @@ void bin_gthreshimg(IMAGE* img, int thresh);
  * @param rthresh the red threshold bound
  * @param gthresh the green threshold bound
  * @param bthresh the blue threshold bound
+ * @param underv the value if the pixel is under the threshold
+ * @param abovev the value if the pixel is above the threshold
  */
-void bin_rgbthreshimg(IMAGE* img, int rthresh, int gthresh, int bthresh);
+void bin_rgbthreshimg(IMAGE* img, int rthresh, int gthresh, int bthresh, BYTE underv, BYTE abovev);
+
+
+/**
+ * @brief Erodes pixels in a `range` "radius" square around (r,c)
+ * 
+ * @param r row in image
+ * @param c column in image
+ * @param destimg image to apply the erosion to
+ * @param srcimg image to use to calculate erosion values
+ * @param range radius of erosion
+ * @return int number of pixels effectively erroded (less than range*range if some are out of bounds)
+ */
+int erode_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int range);
+
+/**
+ * @brief Dialtes pixels in a `range` "radius" square around (r,c)
+ * 
+ * @param r row in image
+ * @param c column in image
+ * @param destimg image to apply the dilation to
+ * @param srcimg image to use to calculate dilation values
+ * @param range radius of dilations
+ * @return int number of pixels effectively dilated (less than range*range if some are out of bounds)
+ */
+int dilate_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int range);
+
 
 #endif

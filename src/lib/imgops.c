@@ -82,35 +82,6 @@ int convert_imgchan(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv) {
 
 }
 
-void bin_gthreshimg(IMAGE* img, int thresh) {
-
-
-    for (int r = 0; r < img->height; r++) {
-        for (int c = 0; c < img->width; c++) {
-
-            GPIXEL* px = get_gpixel(r,c,img);
-
-            BYTE thresh_res = (thresh < px->v) ? 255 : 0;
-
-            set_gpixel(px, thresh_res);
-        }
-    }
-}
-
-void bin_rgbthreshimg(IMAGE* img, int rthresh, int gthresh, int bthresh) {
-    
-    for (int r = 0; r < img->height; r++) {
-        for (int c = 0; c < img->width; c++) {
-            RGBPIXEL* px = get_rgbpixel(r,c,img);
-
-
-            px->r = (px->r < rthresh) ? 0 : 255;
-            px->g = (px->g < gthresh) ? 0 : 255;
-            px->b = (px->b < bthresh) ? 0 : 255;
-        }
-    }
-
-}
 
 
 int convert_imgchanrange(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv, int r1, int c1, int r2, int c2) {
@@ -148,6 +119,75 @@ int convert_imgchanrange(IMAGE* destimg, IMAGE* srcimg, CONVTYPE conv, int r1, i
 
 }
 
+void bin_gthreshimg(IMAGE* img, int thresh, BYTE underv, BYTE abovev) {
+
+    for (int r = 0; r < img->height; r++) {
+        for (int c = 0; c < img->width; c++) {
+
+            GPIXEL* px = get_gpixel(r,c,img);
+
+            BYTE thresh_res = (thresh < px->v) ? abovev : underv;
+
+            set_gpixel(px, thresh_res);
+        }
+    }
+}
+
+void bin_rgbthreshimg(IMAGE* img, int rthresh, int gthresh, int bthresh, BYTE underv, BYTE abovev) {
+    
+    for (int r = 0; r < img->height; r++) {
+        for (int c = 0; c < img->width; c++) {
+            RGBPIXEL* px = get_rgbpixel(r,c,img);
+
+
+            px->r = (px->r < rthresh) ? underv : abovev;
+            px->g = (px->g < gthresh) ? underv : abovev;
+            px->b = (px->b < bthresh) ? underv : abovev;
+        }
+    }
+
+}
+
+int erode_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int range) {
+
+    int effective_errosions = 0;
+
+    if (get_gpixel(r,c,srcimg)->v == 0) {
+        for (int rr = r-range; rr <= r+range; rr++) {
+            for (int cc = c-range; cc <= c+range; cc++) {
+                GPIXEL* px = get_gpixel(rr,cc,destimg);
+
+                if (px != NULL) {
+                    px->v = 0;
+                    effective_errosions++;
+                }
+            } 
+        }
+    }
+
+    return effective_errosions;
+}
+
+
+int dilate_px(int r, int c, IMAGE* destimg, IMAGE* srcimg, unsigned int range){
+
+    int effective_dilations = 0;
+
+    if (get_gpixel(r,c,srcimg)->v == 255) {
+        for (int rr = r-range; rr <= r+range; rr++) {
+            for (int cc = c-range; cc <= c+range; cc++) {
+                GPIXEL* px = get_gpixel(rr,cc,destimg);
+
+                if (px != NULL) {
+                    px->v = 255;
+                    effective_dilations++;
+                }
+            } 
+        }
+    }
+
+    return effective_dilations;
+}
 
 // This function will remain at the end as I think it will be the longest one
 int convert_pxchan(PIXEL* destpx, PIXEL* srcpx, CONVTYPE conv) {

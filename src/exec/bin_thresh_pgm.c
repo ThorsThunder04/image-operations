@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
 
     read_pgm_image(argv[1], &img);
 
-    bin_gthreshimg(&img, thresh);
+    bin_gthreshimg(&img, thresh, 0, 255);
 
     write_pgm2pgm(argv[2], &img);
 
