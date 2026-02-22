@@ -3,7 +3,6 @@
 #include <ctype.h>
 #include <string.h>
 #include <imgio.h>
-#include <imgops.h>
 
 
 PIXEL** pxalloc(int width, int height) {

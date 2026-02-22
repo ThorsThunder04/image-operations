@@ -4,8 +4,15 @@
 
 // no conversions from gray to anything else (as there's only gray)
 typedef enum {
+    
+    // MISC conversions
+    GRAY2RGB = 0, // this just places the R channel across all 3 channels
+    RED2RGB, // same as GRAY2RGB
+    GREEN2RGB, // places G across all 3 channels
+    BLUE2RGB, // same as prev but for B
+
     // RGB source conversions
-    RGB2GRAY = 0,
+    RGB2GRAY, // the gray is placed across all 3 channels (this applies to all X2GRAY conversions)
     RGB2YUV,
     RGB2YCBCR,
     RGB2HSV,
@@ -16,7 +23,7 @@ typedef enum {
     YUV2YCBCR,
     YUV2HSV,
 
-    // YCBCR source conversions
+    // YCbCr source conversions
     YCBCR2RGB,
     YCBCR2YUV,
     YCBCR2GRAY,
@@ -28,6 +35,7 @@ typedef enum {
     HSV2YCBCR,
     HSV2YUV,
 
+    //! Is just used for enum type checking
     _CONVEND
 } CONVTYPE;
 
@@ -41,23 +49,6 @@ typedef enum {
  */
 int is_ib(int r, int c, IMAGE* img);
 
-
-/**
- * @brief converts grayscale pixel to rgb pixel by copying the grayscale value to R, G, and B channels
- *
- * @param px: pointer to a GPIXEL object
- * @returns an RGBPIXEL type
- */
-RGBPIXEL g2rgb(GPIXEL* px);
-
-/**
- * @brief converts rgb pixel to grayscale by storing floor(avg(R,G,B)) into a grayscale pixel
- *
- * @param px: pointer to an RGB pixel
- *
- * @returns an GPIXEL type
- */
-GPIXEL rgb2g(RGBPIXEL* px);
 
 /**
  * @brief gets a PIXEL* type at position (r,c) in an IMAGE
@@ -115,7 +106,6 @@ PIXEL* set_pixel(int r, int c, PIXEL* px, IMAGE* img);
  * @param R red value
  * @param G green value
  * @param B blue value
- * @return RGBPIXEL* towards pixel that was written to | NULL if (r,c) out of bounds
  */
 void set_rgbpixel(RGBPIXEL* px, BYTE R, BYTE G, BYTE B);
 
@@ -134,8 +124,10 @@ void set_gpixel(GPIXEL* px, BYTE V);
  * @param destpx pixel to write converted values to
  * @param srcpx pixel to convert the values from
  * @param conv colorspace conversion type (ex: RGB2HSV)
+ * 
+ * @returns int `0` if success. `-1` if `conv` is a non existant conversion type.
  */
-void convert_pxchan(PIXEL* destpx, PIXEL* srcpx, CONVTYPE conv);
+int convert_pxchan(PIXEL* destpx, PIXEL* srcpx, CONVTYPE conv);
 
 
 /**
