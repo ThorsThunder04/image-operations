@@ -7,7 +7,7 @@
 int main(int argc, char* argv[]) {
 
     if (argc != 3) {
-        printf("Expected usage: %s imgin.ppm imgout.pgm\n");
+        printf("Expected usage: %s imgin.ppm imgout.pgm\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 

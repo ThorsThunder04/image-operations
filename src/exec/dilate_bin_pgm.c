@@ -8,7 +8,7 @@
 int main(int argc, char* argv[]) {
 
     if (argc != 3 ) {
-        printf("Expected usage: %s <in_pathname> <out_pathname>\n");
+        printf("Expected usage: %s <in_pathname> <out_pathname>\n", argv[0]);
         return 1;
     }
     

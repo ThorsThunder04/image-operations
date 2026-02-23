@@ -7,7 +7,7 @@
 int main(int argc, char* argv[]) {
 
     if (argc != 5) {
-        printf("Expected usage: %s <in_pathname> <out_pathname> thresh1 thresh2\n");
+        printf("Expected usage: %s <in_pathname> <out_pathname> thresh1 thresh2\n", argv[0]);
         return 1;
     }
 
