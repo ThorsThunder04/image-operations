@@ -211,18 +211,23 @@ void write_ppm2ppm(char* destname, IMAGE* img) {
 
 void free_img(IMAGE* img) {
 
-    free_pxmat(img->mat, img->height);
+    free_img_pxmat(img);
     free(img);
 }
 
 void free_pxmat(PIXEL** mat, int height) {
 
+    // because each row of columns is individually allocated
     for (int r = 0; r < height; r++) {
         free(mat[r]);
     }
 
     free(mat);
-    *mat = NULL;
+}
+
+void free_img_pxmat(IMAGE* img) {
+
+    free_pxmat(img->mat, img->height);
 }
 
 void get_image_dimensions(char* filename, IMAGE* img) {

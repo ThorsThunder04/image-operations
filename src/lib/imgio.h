@@ -102,20 +102,27 @@ void write_ppm2ppm(char* destname, IMAGE* img);
 
 
 /**
- * @brief De-allocates the dynamically allocated parts of an IMAGE structure
- * @brief NOTE: This attempts to free both `img` and it's pixel matrix. If you only need to free the pixel matrix, use `free_pxmat()`
+ * @brief De-allocates a dynamically allocated image and it's pixel matrix.
+ * @brief NOTE: This attempts to free both `img` AND it's pixel matrix. If you only need to free the pixel matrix, use `free_pxmat()` to free it directly or `free_img_pxmat()` to free it by passing the image type.
  *
  * @param img: pointer towards previously created image structure
  */
 void free_img(IMAGE* img);
 
 /**
- * @brief De-allocates a 2D pixel matrix of a given size
+ * @brief De-allocates a dynamically allocated 2D pixel matrix of a given height
  *
  * @param mat: pointer towards the 2D array
  * @param height: height of the image
  */
 void free_pxmat(PIXEL** mat, int height);
+
+/**
+ * @brief De-allocates the pixel matrix that is inside an image type
+ * 
+ * @param img the image type containing the matrix
+ */
+void free_img_pxmat(IMAGE* img);
 
 /**
  * @brief reads the dimensions from a PNM file and stores them in a provided IMAGE pointer
