@@ -267,6 +267,232 @@ void ouverture_img(IMAGE* destimg, IMAGE* srcimg, unsigned int radius) {
     free_pxmat(tempimg.mat, tempimg.height);
 }
 
+int blur_gpx_cross(IMAGE* destimg, IMAGE* srcimg, int r, int c, unsigned int range) {
+
+    if (!is_ib(r,c,destimg) || !is_ib(r,c,srcimg)) {
+        return 0;
+    }
+
+    int n = 0;
+    int sum = 0;
+
+    // sum the rows of the c column
+    for (int rr = r-range; rr <= r+range; rr++) {
+        GPIXEL* px = get_gpixel(rr, c, srcimg);
+
+        if (px != NULL) {
+            sum += px->v;
+            n++;
+        }
+    }
+
+    // sum the columns of the r row
+    for (int cc = c-range; cc <= c+range; cc++) {
+        GPIXEL* px = get_gpixel(r, cc, srcimg);
+
+        if (px != NULL) {
+            sum += px->v;
+            n++;
+        }
+    }
+
+    // (r,c) already assured to be in bounds of destimg
+    GPIXEL* destpx = get_gpixel(r,c,destimg);
+    BYTE res = 0;
+    // n is unlikely to be 0 anyway
+    if (n > 0) {
+        res = sum/n;
+    } else {
+        res = get_gpixel(r,c,srcimg)->v;
+    }
+
+    set_gpixel(destpx, res);
+
+    return n;
+}
+
+int blur_rgbpx_cross(IMAGE* destimg, IMAGE* srcimg, int r, int c, unsigned int range) {
+
+    if (!is_ib(r,c,destimg) || !is_ib(r,c,srcimg)) {
+        return 0;
+    }
+
+    int n = 0;
+    int sum[3] = {0};
+
+    // sum the rows of the c column
+    for (int rr = r-range; rr <= r+range; rr++) {
+        RGBPIXEL* px = get_rgbpixel(rr, c, srcimg);
+
+        if (px != NULL) {
+            sum[0] += px->r;
+            sum[1] += px->g;
+            sum[2] += px->b;
+            n++;
+        }
+    }
+
+    // sum the columns of the r row
+    for (int cc = c-range; cc <= c+range; cc++) {
+        RGBPIXEL* px = get_rgbpixel(r, cc, srcimg);
+
+        if (px != NULL) {
+            sum[0] += px->r;
+            sum[1] += px->g;
+            sum[2] += px->b;
+            n++;
+        }
+    }
+
+    // (r,c) already assured to be in bounds of destimg
+    RGBPIXEL* destpx = get_rgbpixel(r,c,destimg);
+    // n is unlikely to be 0 anyway
+    if (n > 0) {
+        destpx->r = sum[0]/n;
+        destpx->g = sum[1]/n;
+        destpx->b = sum[2]/n;
+        
+    } else {
+        *destpx = *get_rgbpixel(r,c,srcimg);
+    }
+
+    return n;
+}
+
+
+int blur_gpx_square(IMAGE* destimg, IMAGE* srcimg, int r, int c, unsigned int range) {
+
+    if (!is_ib(r,c,destimg) || !is_ib(r,c,srcimg)) {
+        return 0;
+    }
+
+    int n = 0;
+    int sum = 0;
+
+    for (int rr = r-range; rr <= r+range; rr++) {
+        for (int cc = c-range; cc <= c+range; cc++) {
+            GPIXEL* px = get_gpixel(r,c,srcimg);
+
+            if (px != NULL) {
+                sum += px->v;
+                n++;
+            }
+
+        }
+    }
+
+    GPIXEL* destpx = get_gpixel(r,c,destimg);
+    BYTE res = 0;
+
+    if (n > 0) {
+        res = sum/n;
+    } else {
+        res = get_gpixel(r,c,srcimg)->v;
+    }
+
+    set_gpixel(destpx, res);
+
+    return n;
+}
+
+int blur_rgbpx_square(IMAGE* destimg, IMAGE* srcimg, int r, int c, unsigned int range) {
+
+    if (!is_ib(r,c,destimg) || !is_ib(r,c,srcimg)) {
+        return 0;
+    }
+
+    int n = 0;
+    int sum[3] = {0};
+
+    for (int rr = r-range; rr <= r+range; rr++) {
+        for (int cc = c-range; cc <= c+range; cc++) {
+            RGBPIXEL* px = get_rgbpixel(r,c,srcimg);
+
+            if (px != NULL) {
+                sum[0] = px->r;
+                sum[1] = px->g;
+                sum[2] = px->b;
+                n++;
+            }
+
+        }
+    }
+
+    RGBPIXEL* destpx = get_rgbpixel(r,c,destimg);
+
+    if (n > 0) {
+        destpx->r = sum[0]/n;
+        destpx->g = sum[1]/n;
+        destpx->b = sum[2]/n;
+
+    } else {
+        *destpx = *get_rgbpixel(r,c,srcimg);
+    }
+
+    return n;
+}
+
+int apply_blur2img(
+    int (*blur_func)(IMAGE*, IMAGE*, int, int, unsigned int),
+    IMAGE* destimg,
+    IMAGE* srcimg,
+    unsigned int range
+) {
+
+    if (destimg->height != srcimg->height || destimg->width != srcimg->width) {
+        return -1;
+    }
+    
+    for (int r = 0; r < srcimg->height; r++) {
+        for (int c = 0; c < srcimg->width; c++) {
+            // no worry about return values because `apply_blur2img` already assures we're in bounds
+            // out of bounds caused by the range are disregarded
+            blur_func(destimg, srcimg,r,c,range);
+        }
+    }
+
+    return 0;
+
+}
+
+int blur_img_rep(int (*blur_img_func)(IMAGE* , IMAGE*, unsigned int), IMAGE* destimg, IMAGE* srcimg, unsigned int range, int n_reps) {
+
+    // create a temporary image for intermediate blurs
+    IMAGE tempimg1 = {0};
+    IMAGE tempimg2 = {0};
+
+    copy_img(&tempimg1, srcimg);
+    tempimg2 = tempimg1;
+    PIXEL** newalloc = pxalloc(tempimg2.width, tempimg2.height);
+    if (newalloc == NULL) {
+        return -1;
+    }
+    tempimg2.mat = newalloc;
+
+
+    for (int i = 0; i < n_reps; i++) {
+        blur_img_func(&tempimg2, &tempimg1, range);
+
+        // switch both structures around and their pointers for the next iteration
+        IMAGE s = tempimg2;
+        tempimg2 = tempimg1;
+        tempimg1 = s;
+        
+    }
+
+    // now that we have done all of the repetitive bluring, we copy resulting pixel matrix
+    // values into the pixel matrix of the destination image
+    // the reason we don't just move the pointer is because the destimg->mat pointer could be used elsewhere, and we don't want to overwrite it
+    copy_pxmat(destimg->mat, tempimg1.mat, tempimg1.width, tempimg1.height);
+
+    // free the allocated pixel matrixes for this function
+    free_img_pxmat(&tempimg1);
+    free_img_pxmat(&tempimg2);
+
+    return 0;
+
+}
+
 
 // This function will remain at the end as I think it will be the longest one
 int convert_channel_px(PIXEL* destpx, PIXEL* srcpx, CONVTYPE conv) {

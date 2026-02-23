@@ -241,5 +241,81 @@ void fermeture_img(IMAGE* destimg, IMAGE* srcimg, unsigned int radius);
  */
 void ouverture_img(IMAGE* destimg, IMAGE* srcimg, unsigned int radius);
 
+/**
+ * @brief Calculates the blur value of a grayscale image using a cross around (r,c) and places it on a destination image
+ * 
+ * @param destimg image to place the blured pixel on
+ * @param srcimg source image to calculate the blur from
+ * @param r row of pixel
+ * @param c column of pixel
+ * @param range the size of the cross
+ * @return int number of effective pixels used for the blur | 0 if out of bounds error with (r,c) on `destimg` or `srcimg`, 
+ */
+int blur_gpx_cross(IMAGE* destimg, IMAGE* srcimg, int r, int c, unsigned int range);
+
+/**
+ * @brief Calculates the blur value of a rgb image using a cross around (r,c) and places it on a destination image
+ * 
+ * @param destimg image to place the blured pixel on
+ * @param srcimg source image to calculate the blur from
+ * @param r row of pixel
+ * @param c column of pixel
+ * @param range the size of the cross
+ * @return int number of effective pixels used for the blur | 0 if out of bounds error with (r,c) on `destimg` or `srcimg`, 
+ */
+int blur_rgbpx_cross(IMAGE* destimg, IMAGE* srcimg, int r, int c, unsigned int range);
+
+/**
+ * @brief Calculates the blur value of a grayscale image using a square around (r,c) and places it on a destination image
+ * 
+ * @param destimg image to place the blured pixel on
+ * @param srcimg source image ot calculate the blur from
+ * @param r row of pixel
+ * @param c column of pixel
+ * @param range the size of the square (one side would be 1 + range*2)
+ * @return int number of effective pixels used for the blur | 0 if out of bounds error with (r,c) on `destimg` or `srcimg`, 
+ */
+int blur_gpx_square(IMAGE* destimg, IMAGE* srcimg, int r, int c, unsigned int range);
+
+/**
+ * @brief Calculates the blur value of a rgb image using a square around (r,c) and places it on a destination image
+ * 
+ * @param destimg image to place the blured pixel on
+ * @param srcimg source image ot calculate the blur from
+ * @param r row of pixel
+ * @param c column of pixel
+ * @param range the size of the square (one side would be 1 + range*2)
+ * @return int number of effective pixels used for the blur | 0 if out of bounds error with (r,c) on `destimg` or `srcimg`, 
+ */
+int blur_rgbpx_square(IMAGE* destimg, IMAGE* srcimg, int r, int c, unsigned int range);
+
+/**
+ * @brief Applies any blur function with the corresponding signature to an image
+ * 
+ * @param blur_func the blur function to apply to each pixel of an image
+ * @param destimg the image to place the blured pixels to
+ * @param srcimg  the image to use to calculate the blur values
+ * @param range the range of the blur
+ * @return int 0 if success. -1 if shape of `destimg` and `srcimg` don't match
+ */
+int apply_blur2img(
+    int (*blur_func)(IMAGE*, IMAGE*, int, int, unsigned int),
+    IMAGE* destimg,
+    IMAGE* srcimg,
+    unsigned int range
+);
+
+/**
+ * @brief apply a given image bluring function to an image `n_reps` times
+ * 
+ * @param blur_img_func the image blur function to apply
+ * @param destimg the destination image to write the resulting blur to
+ * @param srcimg the source image to calcualte the blur from
+ * @param range the range of the blur
+ * @param n_reps the amount of times to apply `blur_img_func` to an image before writing it to `destimg`
+ * @returns 0 if success. -1 if error allocating intermediate images
+ */
+int blur_img_rep(int (*blur_img_func)(IMAGE*, IMAGE*, unsigned int), IMAGE* destimg, IMAGE* srcimg, unsigned int range, int n_reps);
+
 
 #endif
