@@ -493,6 +493,17 @@ int blur_img_rep(int (*blur_img_func)(IMAGE* , IMAGE*, unsigned int), IMAGE* des
 
 }
 
+void clampg(int* g) {
+    if (*g > 255) *g = 255;
+    else if (*g < 0) *g = 0;
+}
+
+void clamp(int* r, int* g, int* b) {
+    clampg(r);
+    clampg(g);
+    clampg(b);
+
+}
 
 // This function will remain at the end as I think it will be the longest one
 int convert_channel_px(PIXEL* destpx, PIXEL* srcpx, CONVTYPE conv) {
@@ -508,51 +519,108 @@ int convert_channel_px(PIXEL* destpx, PIXEL* srcpx, CONVTYPE conv) {
 
     // srcpx is copied in case `destpx` == `srcpx`
     // allowing them to be equal means that we don't need to also make a conversion function for inplace pixel conversion
-    RGBPIXEL pxcpy = srcpx->cpx; // directly taking RGBPIXEL as it contains all values we could want
+    RGBPIXEL px = srcpx->cpx; // directly taking RGBPIXEL as it contains all values we could want
+
+    int c1,c2,c3;
 
 
     switch (conv) {
 
         // MISC types
 
-        case GRAY2RGB:
-        case RED2RGB: // they're equivalent
+        case GRAY2RGB: case RED2RGB: // they're equivalent
             set_rgbpixel(
                 &srcpx->cpx,
-                pxcpy.r,
-                pxcpy.r,
-                pxcpy.r
+                px.r,
+                px.r,
+                px.r
             );
             break;
         case GREEN2RGB:
             set_rgbpixel(
                 &srcpx->cpx,
-                pxcpy.g,
-                pxcpy.g,
-                pxcpy.g
+                px.g,
+                px.g,
+                px.g
             );
             break;
         case BLUE2RGB:
             set_rgbpixel(
                 &srcpx->cpx,
-                pxcpy.b,
-                pxcpy.b,
-                pxcpy.b
+                px.b,
+                px.b,
+                px.b
             );
             break;
         
         // from RGB
         case RGB2GRAY:
-            BYTE luma = 0.299*pxcpy.r + 0.587*pxcpy.g + 0.114*pxcpy.b;
+            // Y
+            c1 = 0.299*px.r + 0.587*px.g + 0.114*px.b;
             set_rgbpixel(
                 &srcpx->cpx,
-                luma,luma,luma
+                c1,c1,c1
+            );
+            break;
+        
+        case RGB2YUV:
+            // Y
+            c1 = 0.299*px.r + 0.587*px.g + 0.114*px.b;
+            // U
+            c2 = 0.492*(px.b - c1) + 128;
+            // V
+            c3 = 0.877*(px.r - c1) + 128;
+            set_rgbpixel(
+                &srcpx->cpx,
+                c1,c2,c3
             );
             break;
 
+        case RGB2YCBCR:
+            // Y 
+            c1 = 0.299*px.r + 0.587*px.g + 0.114*px.b;
+            // Cb
+            c2 = -0.1687*px.r - 0.3313*px.g + 0.5*px.b + 128;
+            // Cr
+            c3 = 0.5*px.r - 0.4187*px.g - 0.0813*px.b + 128;
+            set_rgbpixel(
+                &srcpx->cpx,
+                c1, c2, c3
+            );
+            break;
+            
+
         // from YUV
+        case YUV2RGB:
+            // R
+            c1 = px.r + 1.14*px.b;
+            // G
+            c2 = px.r - 0.395*px.g - 0.581*px.b;
+            // B
+            c3 = px.r + 2.033*px.b;
+
+            set_rgbpixel(
+                &srcpx->cpx,
+                c1, c2, c3
+            );
+            break;
 
         // from YCbCr
+        case YCBCR2RGB:
+            // R
+            c1 = px.r + 1.402*(px.b - 128);
+            // G
+            c2 = px.r - 0.34414*(px.g - 128) - 0.714414*(px.b - 128);
+            // B
+            c3 = px.r + 1.772*(px.g - 128);
+
+            clamp(&c1, &c2, &c3);
+
+            set_rgbpixel(
+                &srcpx->cpx,
+                c1, c2, c3
+            );
+            break;
 
         // from HSV
 

@@ -16,6 +16,7 @@ enum _channel_conversion_type_enum {
     RGB2YUV,
     RGB2YCBCR,
     RGB2HSV,
+    RGB2XYZ,
 
     // YUV source conversions
     YUV2RGB,
@@ -316,6 +317,23 @@ int apply_blur2img(
  * @returns 0 if success. -1 if error allocating intermediate images
  */
 int blur_img_rep(int (*blur_img_func)(IMAGE*, IMAGE*, unsigned int), IMAGE* destimg, IMAGE* srcimg, unsigned int range, int n_reps);
+
+/**
+ * @brief clamps a single value between 0 and 255
+ * 
+ * @param g grayscale pixel value
+ */
+void clampg(int* g);
+
+/**
+ * @brief Clamps the values of r,g,b to be between 0 and 255. if above 255, set to 255, if under 0, set to 0
+ * 
+ * @param r red channel
+ * @param g green channel
+ * @param b blue channel
+ */
+void clamprgb(int* r, int* g, int* b);
+
 
 
 #endif
