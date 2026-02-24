@@ -24,7 +24,7 @@ target_sources(imgops
             imgops.h
 )
 
-target_compile_options(imgops PRIVATE -Wall)
+target_compile_options(imgops PRIVATE -Wall -lm)
 target_compile_options(imgio PRIVATE -Wall)
 
 target_link_libraries(imgops PRIVATE imgio)

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "imgio.h"
 #include "imgops.h"
 
@@ -502,6 +503,52 @@ void clamp(int* r, int* g, int* b) {
     clampg(r);
     clampg(g);
     clampg(b);
+
+}
+
+int grad_gpx(int r, int c, IMAGE* img) {
+    
+    int pxmv = 0, pxrv = 0, pxcv = 0;
+    // get the necessary pixels (origin, next row and next column)
+    GPIXEL* pxm = get_gpixel(r,c,img);
+    GPIXEL* pxr = get_gpixel(r+1,c,img);
+    GPIXEL* pxc = get_gpixel(r,c+1,img);
+
+    // if the pixels are in bounds, get their values
+    if (pxm != NULL) pxmv = pxm->v;
+
+    if (pxr != NULL) pxrv = pxr->v;
+
+    if (pxc != NULL) pxcv = pxc->v;
+    
+    int Ir = pxmv - pxrv;
+    int Ic = pxmv - pxcv;
+    
+    return sqrt(Ir*Ir + Ic*Ic);
+}
+
+int grad_gimg(IMAGE* destimg, IMAGE* srcimg) {
+    
+    if (destimg->width != srcimg->width || destimg->height != srcimg->height) {
+        return -1;
+    }
+
+    for (int r = 0; r < destimg->height; r++) {
+        for (int c = 0; c < destimg->width; c++) {
+            GPIXEL* px = get_gpixel(r,c,destimg);
+            if (px == NULL) {
+                return -2;
+            }
+
+            set_gpixel(
+                px,
+                grad_gpx(r, c, srcimg)
+            );
+
+        }
+    }
+
+    return 0;
 
 }
 

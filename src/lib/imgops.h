@@ -334,6 +334,24 @@ void clampg(int* g);
  */
 void clamprgb(int* r, int* g, int* b);
 
+/**
+ * @brief Calculates the gradient of a given grayscale pixel
+ * 
+ * @param r row of pixel
+ * @param c column of pixel
+ * @param img image to calculate gradients from
+ * @return int return the calculated gradient value
+ */
+int grad_gpx(int r, int c, IMAGE* img);
+
+/**
+ * @brief calculate norme gradient image of a given grayscale image
+ * 
+ * @param destimg image to write the resulting gradient to
+ * @param srcimg image to calculate the gradient from
+ * @param return int `0` if success. `-1` if the shape of `destimg` and `srcimg` don't match. `-2` if error getting pixel from `destimg`
+ */
+int grad_gimg(IMAGE* destimg, IMAGE* srcimg);
 
 
 #endif
