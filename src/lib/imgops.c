@@ -371,7 +371,7 @@ int blur_gpx_square(IMAGE* destimg, IMAGE* srcimg, int r, int c, unsigned int ra
 
     for (int rr = r-range; rr <= r+range; rr++) {
         for (int cc = c-range; cc <= c+range; cc++) {
-            GPIXEL* px = get_gpixel(r,c,srcimg);
+            GPIXEL* px = get_gpixel(rr,cc,srcimg);
 
             if (px != NULL) {
                 sum += px->v;
@@ -406,12 +406,12 @@ int blur_rgbpx_square(IMAGE* destimg, IMAGE* srcimg, int r, int c, unsigned int 
 
     for (int rr = r-range; rr <= r+range; rr++) {
         for (int cc = c-range; cc <= c+range; cc++) {
-            RGBPIXEL* px = get_rgbpixel(r,c,srcimg);
+            RGBPIXEL* px = get_rgbpixel(rr,cc,srcimg);
 
             if (px != NULL) {
-                sum[0] = px->r;
-                sum[1] = px->g;
-                sum[2] = px->b;
+                sum[0] += px->r;
+                sum[1] += px->g;
+                sum[2] += px->b;
                 n++;
             }
 
