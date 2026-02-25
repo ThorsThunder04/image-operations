@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include <imgio.h>
+#include "imgio.h"
 
 
 PIXEL** pxalloc(int width, int height) {

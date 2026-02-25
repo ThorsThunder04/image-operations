@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <imgio.h>
-#include <imgops.h>
+#include "imgio.h"
+#include "imgops.h"
 
 
 
